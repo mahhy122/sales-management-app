@@ -174,3 +174,25 @@
     align-self: flex-end;
   }
 }
+
+.actionArea {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dismissBtn {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: 1px solid var(--warning-border);
+  color: var(--warning-foreground);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.dismissBtn:hover {
+  background: var(--warning-border);
+}

@@ -8,9 +8,12 @@ import styles from './SupabaseSetupBanner.module.css';
 export default function SupabaseSetupBanner() {
   const [configured, setConfigured] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
     setConfigured(isSupabaseConfigured());
+    const isDismissed = localStorage.getItem('hide_supabase_banner') === 'true';
+    setDismissed(isDismissed);
   }, []);
 
   const envTemplate = `NEXT_PUBLIC_SUPABASE_URL=あなたのSUPABASE_URL
@@ -22,8 +25,17 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=あなたのSUPABASE_ANON_KEY`;
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleDismiss = () => {
+    localStorage.setItem('hide_supabase_banner', 'true');
+    setDismissed(true);
+  };
+
+  if (configured || dismissed) {
+    return null;
+  }
+
   return (
-    <div className={`${styles.banner} ${configured ? styles.live : styles.mock}`}>
+    <div className={`${styles.banner} ${styles.mock}`}>
       <div className={styles.header}>
         <div className={styles.titleArea}>
           <div className={`${styles.iconCircle} ${configured ? styles.liveIcon : styles.mockIcon}`}>
@@ -40,9 +52,14 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=あなたのSUPABASE_ANON_KEY`;
             </p>
           </div>
         </div>
-        <span className={`${styles.badge} ${configured ? styles.badgeLive : styles.badgeMock}`}>
-          {configured ? 'LIVE' : 'MOCK'}
-        </span>
+        <div className={styles.actionArea}>
+          <span className={`${styles.badge} ${styles.badgeMock}`}>
+            MOCK
+          </span>
+          <button className={styles.dismissBtn} onClick={handleDismiss} title="バナーを閉じる">
+            ✕ 閉じる
+          </button>
+        </div>
       </div>
 
       {!configured && (
