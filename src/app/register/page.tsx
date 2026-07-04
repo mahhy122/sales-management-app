@@ -14,6 +14,7 @@ import {
 import { getProducts, createOrder, getSalesDashboard, Product } from '@/lib/supabase';
 import SupabaseSetupBanner from '@/components/SupabaseSetupBanner';
 import CashDrawerSetupWizard from '@/components/CashDrawerSetupWizard';
+import KeypadInput from '@/components/KeypadInput';
 import styles from './register.module.css';
 
 interface CartItem {
@@ -304,14 +305,15 @@ export default function RegisterPage() {
                   {/* Cash received input */}
                   <div className="form-group" style={{ marginTop: '0.5rem', marginBottom: '0.5rem' }}>
                     <label className="form-label" style={{ fontWeight: 600 }}>お預かり金額 (円)</label>
-                    <input 
-                      type="number" 
+                    <KeypadInput 
+                      type="text" 
                       className="form-input" 
                       style={{ fontSize: '1.25rem', fontWeight: 'bold', padding: '0.6rem 1rem' }}
                       placeholder="預かり金額を入力"
                       value={paymentReceived}
-                      onChange={(e) => setPaymentReceived(e.target.value)}
-                      min="0"
+                      onChange={(val) => setPaymentReceived(val)}
+                      title="お預かり金額の入力"
+                      suffix="円"
                     />
                   </div>
 

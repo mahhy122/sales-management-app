@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { getSourcing, addSourcingItem, deleteSourcingItem, SourcingItem } from '@/lib/supabase';
 import SupabaseSetupBanner from '@/components/SupabaseSetupBanner';
+import KeypadInput from '@/components/KeypadInput';
 import styles from './sourcing.module.css';
 
 export default function SourcingPage() {
@@ -260,14 +261,14 @@ export default function SourcingPage() {
               <div className="grid-cols-2" style={{ gap: '0.75rem', marginBottom: '0.25rem' }}>
                 <div className="form-group">
                   <label className="form-label">数量</label>
-                  <input 
-                    type="number" 
+                  <KeypadInput 
+                    type="text" 
                     className="form-input"
                     placeholder="5"
                     value={quantity}
-                    onChange={(e) => setQuantity(e.target.value)}
-                    min="0.01"
-                    step="any"
+                    onChange={(val) => setQuantity(val)}
+                    title="数量の入力"
+                    suffix={unit}
                   />
                 </div>
 
@@ -287,13 +288,14 @@ export default function SourcingPage() {
 
               <div className="form-group">
                 <label className="form-label">仕入れ総額 (円)</label>
-                <input 
-                  type="number" 
+                <KeypadInput 
+                  type="text" 
                   className="form-input"
                   placeholder="例: 8500"
                   value={cost}
-                  onChange={(e) => setCost(e.target.value)}
-                  min="0"
+                  onChange={(val) => setCost(val)}
+                  title="仕入れ総額の入力"
+                  suffix="円"
                 />
               </div>
 

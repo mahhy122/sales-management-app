@@ -25,6 +25,7 @@ import {
   CashCount 
 } from '@/lib/supabase';
 import SupabaseSetupBanner from '@/components/SupabaseSetupBanner';
+import KeypadInput from '@/components/KeypadInput';
 import styles from './cash.module.css';
 
 export default function CashPage() {
@@ -351,12 +352,13 @@ export default function CashPage() {
                     
                     <div className={styles.denomRow}>
                       <span className={styles.denomLabel}>10,000 円札</span>
-                      <input 
-                        type="number" 
+                      <KeypadInput 
+                        type="text" 
                         className="form-input text-right" 
                         value={bill10000} 
-                        onChange={(e) => setBill10000(e.target.value)} 
-                        min="0"
+                        onChange={(val) => setBill10000(val)} 
+                        title="1万円札の枚数"
+                        suffix="枚"
                       />
                       <span className={styles.denomMultiply}>x</span>
                       <span className={styles.denomSubtotal}>{formatCurrency(b10000 * 10000)}</span>
@@ -364,12 +366,13 @@ export default function CashPage() {
 
                     <div className={styles.denomRow}>
                       <span className={styles.denomLabel}>5,000 円札</span>
-                      <input 
-                        type="number" 
+                      <KeypadInput 
+                        type="text" 
                         className="form-input text-right" 
                         value={bill5000} 
-                        onChange={(e) => setBill5000(e.target.value)} 
-                        min="0"
+                        onChange={(val) => setBill5000(val)} 
+                        title="5千円札の枚数"
+                        suffix="枚"
                       />
                       <span className={styles.denomMultiply}>x</span>
                       <span className={styles.denomSubtotal}>{formatCurrency(b5000 * 5000)}</span>
@@ -377,12 +380,13 @@ export default function CashPage() {
 
                     <div className={styles.denomRow}>
                       <span className={styles.denomLabel}>1,000 円札</span>
-                      <input 
-                        type="number" 
+                      <KeypadInput 
+                        type="text" 
                         className="form-input text-right" 
                         value={bill1000} 
-                        onChange={(e) => setBill1000(e.target.value)} 
-                        min="0"
+                        onChange={(val) => setBill1000(val)} 
+                        title="千円札の枚数"
+                        suffix="枚"
                       />
                       <span className={styles.denomMultiply}>x</span>
                       <span className={styles.denomSubtotal}>{formatCurrency(b1000 * 1000)}</span>
@@ -395,12 +399,13 @@ export default function CashPage() {
                     
                     <div className={styles.denomRow}>
                       <span className={styles.denomLabel}>500 円玉</span>
-                      <input 
-                        type="number" 
+                      <KeypadInput 
+                        type="text" 
                         className="form-input text-right" 
                         value={coin500} 
-                        onChange={(e) => setCoin500(e.target.value)} 
-                        min="0"
+                        onChange={(val) => setCoin500(val)} 
+                        title="500円玉の枚数"
+                        suffix="枚"
                       />
                       <span className={styles.denomMultiply}>x</span>
                       <span className={styles.denomSubtotal}>{formatCurrency(c500 * 500)}</span>
@@ -408,12 +413,13 @@ export default function CashPage() {
 
                     <div className={styles.denomRow}>
                       <span className={styles.denomLabel}>100 円玉</span>
-                      <input 
-                        type="number" 
+                      <KeypadInput 
+                        type="text" 
                         className="form-input text-right" 
                         value={coin100} 
-                        onChange={(e) => setCoin100(e.target.value)} 
-                        min="0"
+                        onChange={(val) => setCoin100(val)} 
+                        title="100円玉の枚数"
+                        suffix="枚"
                       />
                       <span className={styles.denomMultiply}>x</span>
                       <span className={styles.denomSubtotal}>{formatCurrency(c100 * 100)}</span>
@@ -421,12 +427,13 @@ export default function CashPage() {
 
                     <div className={styles.denomRow}>
                       <span className={styles.denomLabel}>50 円玉</span>
-                      <input 
-                        type="number" 
+                      <KeypadInput 
+                        type="text" 
                         className="form-input text-right" 
                         value={coin50} 
-                        onChange={(e) => setCoin50(e.target.value)} 
-                        min="0"
+                        onChange={(val) => setCoin50(val)} 
+                        title="50円玉の枚数"
+                        suffix="枚"
                       />
                       <span className={styles.denomMultiply}>x</span>
                       <span className={styles.denomSubtotal}>{formatCurrency(c50 * 50)}</span>
@@ -434,12 +441,13 @@ export default function CashPage() {
 
                     <div className={styles.denomRow}>
                       <span className={styles.denomLabel}>10 円玉</span>
-                      <input 
-                        type="number" 
+                      <KeypadInput 
+                        type="text" 
                         className="form-input text-right" 
                         value={coin10} 
-                        onChange={(e) => setCoin10(e.target.value)} 
-                        min="0"
+                        onChange={(val) => setCoin10(val)} 
+                        title="10円玉の枚数"
+                        suffix="枚"
                       />
                       <span className={styles.denomMultiply}>x</span>
                       <span className={styles.denomSubtotal}>{formatCurrency(c10 * 10)}</span>
@@ -447,12 +455,13 @@ export default function CashPage() {
 
                     <div className={styles.denomRow}>
                       <span className={styles.denomLabel}>5 円玉</span>
-                      <input 
-                        type="number" 
+                      <KeypadInput 
+                        type="text" 
                         className="form-input text-right" 
                         value={coin5} 
-                        onChange={(e) => setCoin5(e.target.value)} 
-                        min="0"
+                        onChange={(val) => setCoin5(val)} 
+                        title="5円玉の枚数"
+                        suffix="枚"
                       />
                       <span className={styles.denomMultiply}>x</span>
                       <span className={styles.denomSubtotal}>{formatCurrency(c5 * 5)}</span>
@@ -460,12 +469,13 @@ export default function CashPage() {
 
                     <div className={styles.denomRow}>
                       <span className={styles.denomLabel}>1 円玉</span>
-                      <input 
-                        type="number" 
+                      <KeypadInput 
+                        type="text" 
                         className="form-input text-right" 
                         value={coin1} 
-                        onChange={(e) => setCoin1(e.target.value)} 
-                        min="0"
+                        onChange={(val) => setCoin1(val)} 
+                        title="1円玉の枚数"
+                        suffix="枚"
                       />
                       <span className={styles.denomMultiply}>x</span>
                       <span className={styles.denomSubtotal}>{formatCurrency(c1 * 1)}</span>
@@ -575,13 +585,15 @@ export default function CashPage() {
                     }
                   </label>
                   <div className={styles.inputWithUnit}>
-                    <input 
-                      type="number" 
+                    <KeypadInput 
+                      type="text" 
                       className="form-input"
                       placeholder={logType === '両替' ? '0' : '5000'}
                       value={logAmount}
-                      onChange={(e) => setLogAmount(e.target.value)}
+                      onChange={(val) => setLogAmount(val)}
                       disabled={logType === '両替'}
+                      title="操作金額の入力"
+                      suffix="円"
                     />
                     <span className={styles.unitRight}>円</span>
                   </div>
