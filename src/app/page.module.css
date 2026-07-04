@@ -1,0 +1,353 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  gap: 1.5rem;
+}
+
+.title {
+  font-size: 1.85rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--foreground);
+}
+
+.subtitle {
+  font-size: 0.95rem;
+  color: var(--muted-foreground);
+  margin-top: 0.25rem;
+}
+
+/* Cash Drawer status bar [NEW] */
+.cashDrawerAlert {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 0.85rem 1.25rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+  margin-bottom: 0.5rem;
+}
+
+.cashDrawerAlertMain {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.cashDivider {
+  color: var(--border);
+}
+
+.cashAuditLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-weight: 600;
+  color: var(--primary);
+  transition: var(--transition);
+}
+
+.cashAuditLink:hover {
+  color: var(--primary-hover);
+  text-decoration: underline;
+}
+
+/* 4 Card KPI Grid */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.statHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.statLabel {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+}
+
+.iconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+}
+
+/* Color codes */
+.primaryBg {
+  background: var(--primary-light);
+}
+.primaryColor {
+  color: var(--primary);
+}
+
+.dangerBg {
+  background: var(--danger-light);
+}
+.dangerColor {
+  color: var(--danger);
+}
+
+.successBg {
+  background: var(--success-light);
+}
+.successColor {
+  color: var(--success);
+}
+
+.warningBg {
+  background: #fef3c7; /* Amber 100 */
+  color: var(--warning);
+}
+.warningColor {
+  color: var(--warning);
+}
+
+.statValue {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--foreground);
+  letter-spacing: -0.03em;
+  margin-bottom: 0.25rem;
+}
+
+.profitPlus {
+  color: var(--success) !important;
+}
+
+.profitMinus {
+  color: var(--danger) !important;
+}
+
+.statFooter {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  font-weight: 500;
+}
+
+.footerHighlight {
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+/* Lists Grid */
+.recentCard {
+  grid-column: span 2;
+}
+
+@media (max-width: 1024px) {
+  .recentCard {
+    grid-column: span 1;
+  }
+}
+
+.orderItemsCell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.orderItemBadge {
+  background: var(--secondary);
+  border: 1px solid var(--border);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  color: var(--foreground);
+}
+
+/* Delete cancellation button */
+.deleteBtn {
+  background: none;
+  border: none;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+
+.deleteBtn:hover {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+.deleteBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Menu Sales progress bars */
+.categoryList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 0.5rem;
+  flex-grow: 1;
+}
+
+.categoryItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.categoryMeta {
+  display: flex;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.categoryRank {
+  font-weight: 700;
+  color: var(--muted-foreground);
+  width: 24px;
+}
+
+.categoryName {
+  font-weight: 600;
+  color: var(--foreground);
+  flex-grow: 1;
+}
+
+.categoryValue {
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.progressBarBg {
+  height: 6px;
+  background: var(--secondary);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.progressBarFill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.liveDashboardTip {
+  margin-top: 1.5rem;
+  padding: 0.75rem;
+  background: var(--secondary);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  font-size: 0.725rem;
+  color: var(--muted-foreground);
+  line-height: 1.4;
+}
+
+/* Loaders and Empty state */
+.loadingArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 2rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  gap: 1rem;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--secondary);
+  border-top: 3px solid var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.errorArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 2rem;
+  background: var(--card);
+  border: 1px solid var(--danger-border);
+  border-radius: var(--radius);
+  text-align: center;
+  gap: 0.75rem;
+}
+
+.errorArea h3 {
+  color: var(--danger-foreground);
+  font-weight: 600;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1.5rem;
+  text-align: center;
+  color: var(--muted-foreground);
+  font-size: 0.9rem;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+}
+
+@media (max-width: 1200px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .header Link {
+    width: 100%;
+  }
+  .cashDrawerAlert {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .cashDivider {
+    display: none;
+  }
+  .cashDrawerAlertMain {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+}

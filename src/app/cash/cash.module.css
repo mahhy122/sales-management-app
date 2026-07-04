@@ -1,0 +1,423 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.title {
+  font-size: 1.85rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--foreground);
+}
+
+.subtitle {
+  font-size: 0.95rem;
+  color: var(--muted-foreground);
+  margin-top: 0.25rem;
+}
+
+/* Stats Widget overrides */
+.statsIconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+}
+
+.blueBg { background: var(--primary-light); }
+.blueColor { color: var(--primary); }
+
+.greenBg { background: var(--success-light); }
+.greenColor { color: var(--success); }
+
+.redBg { background: var(--danger-light); }
+.redColor { color: var(--danger); }
+
+.amberBg { background: #fef3c7; }
+.amberColor { color: var(--warning); }
+
+.statsLabel {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+}
+
+.statsValue {
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.statsDesc {
+  font-size: 0.725rem;
+  color: var(--muted-foreground);
+  margin-top: 0.15rem;
+}
+
+.profitPlus { color: var(--success) !important; }
+.profitMinus { color: var(--danger) !important; }
+
+/* POS Column overrides */
+.countingColumn {
+  grid-column: span 2;
+}
+
+@media (max-width: 1024px) {
+  .countingColumn {
+    grid-column: span 1;
+  }
+}
+
+.resetBtn {
+  background: none;
+  border: none;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: var(--transition);
+  padding: 0.25rem;
+  border-radius: 4px;
+}
+
+.resetBtn:hover {
+  background: var(--secondary);
+  color: var(--foreground);
+}
+
+.countSuccessAlert {
+  background: var(--success-light);
+  border: 1px solid var(--success-border);
+  color: var(--success-foreground);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+/* Denomination grid count form */
+.denominationGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .denominationGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+.denomSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.denomSectionTitle {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--foreground);
+  border-bottom: 2px solid var(--secondary);
+  padding-bottom: 0.35rem;
+  margin-bottom: 0.25rem;
+}
+
+.denomRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.denomLabel {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  width: 90px;
+}
+
+.denomRow input {
+  width: 70px !important;
+  padding: 0.4rem 0.5rem;
+  font-size: 0.9rem;
+}
+
+.denomMultiply {
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+}
+
+.denomSubtotal {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--foreground);
+  flex-grow: 1;
+  text-align: right;
+}
+
+/* Audit calculation panel */
+.auditPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+  margin-top: 0.5rem;
+}
+
+.auditRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+
+.auditValueCounted {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.auditValueExpected {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--muted-foreground);
+}
+
+/* Discrepancy box styles */
+.discrepancyBox {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: 1.05rem;
+  border: 1px solid transparent;
+  margin: 0.25rem 0;
+}
+
+.discrepancyMatch {
+  background: var(--success-light);
+  border-color: var(--success-border);
+  color: var(--success);
+}
+
+.discrepancyDeficit {
+  background: var(--danger-light);
+  border-color: var(--danger-border);
+  color: var(--danger);
+}
+
+.discrepancySurplus {
+  background: #fdf2f8; /* Pink 50 */
+  border-color: #fbcfe8; /* Pink 200 */
+  color: #db2777; /* Pink 600 */
+}
+
+.discrepancyLabel {
+  font-size: 0.85rem;
+}
+
+.discrepancyValue {
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+/* Quick Input unit decoration */
+.inputWithUnit {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.inputWithUnit input {
+  padding-right: 3rem;
+}
+
+.unitRight {
+  position: absolute;
+  right: 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  pointer-events: none;
+}
+
+/* Alerts inside form */
+.formSuccessAlert {
+  background: var(--success-light);
+  border: 1px solid var(--success-border);
+  color: var(--success-foreground);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.formErrorAlert {
+  background: var(--danger-light);
+  border: 1px solid var(--danger-border);
+  color: var(--danger-foreground);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+/* Info tooltip */
+.masterInfoTip {
+  display: flex;
+  margin-top: 1.5rem;
+  padding: 0.75rem;
+  background: var(--secondary);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  line-height: 1.4;
+}
+
+/* Empty State */
+.emptyState {
+  display: flex;
+  justify-content: center;
+  padding: 3rem 1rem;
+  color: var(--muted-foreground);
+  font-size: 0.9rem;
+}
+
+/* Timeline historical logs list */
+.timelineContainer {
+  max-height: 350px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.timeline {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-left: 0.5rem;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 28px; /* Alignment with badge */
+  width: 2px;
+  background: var(--border);
+}
+
+.timelineItem {
+  display: flex;
+  gap: 1rem;
+  position: relative;
+}
+
+.timelineBadge {
+  width: 58px;
+  height: 24px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: white;
+  z-index: 1;
+  text-transform: uppercase;
+}
+
+.badgeSuccess { background: var(--success); }
+.badgeWarning { background: var(--warning); }
+.badgeBlue { background: var(--primary); }
+.badgeRed { background: var(--danger); }
+.badgeGreen { background: #0d9488; }
+.badgeSecondary { background: var(--muted-foreground); }
+
+.timelineContent {
+  flex-grow: 1;
+  background: var(--secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.timelineTime {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+}
+
+.timelineTitle {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.timelineDesc {
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+  line-height: 1.4;
+}
+
+.denomCountsDetails {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  font-family: monospace;
+  background: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  border: 1px dashed var(--border);
+  margin-top: 0.35rem;
+}
+
+/* Spinner loaders */
+.loadingArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 2rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  gap: 1rem;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--secondary);
+  border-top: 3px solid var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

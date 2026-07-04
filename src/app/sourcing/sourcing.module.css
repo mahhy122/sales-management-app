@@ -1,0 +1,192 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.title {
+  font-size: 1.85rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--foreground);
+}
+
+.subtitle {
+  font-size: 0.95rem;
+  color: var(--muted-foreground);
+  margin-top: 0.25rem;
+}
+
+/* Cost Summary Badge Widget */
+.costIconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  background: var(--danger-light);
+}
+
+.costColor {
+  color: var(--danger);
+}
+
+.costLabel {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+}
+
+.costValue {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--danger);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.costDesc {
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+}
+
+/* Two-column layout */
+.listCard {
+  grid-column: span 2;
+}
+
+@media (max-width: 1024px) {
+  .listCard {
+    grid-column: span 1;
+  }
+}
+
+.itemName {
+  font-weight: 600;
+  color: var(--foreground);
+  font-size: 0.95rem;
+}
+
+.unitText {
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+  font-weight: 500;
+  margin-left: 0.15rem;
+}
+
+/* Delete button */
+.deleteBtn {
+  background: none;
+  border: none;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+
+.deleteBtn:hover {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+/* Alerts inside form */
+.formSuccessAlert {
+  background: var(--success-light);
+  border: 1px solid var(--success-border);
+  color: var(--success-foreground);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.formErrorAlert {
+  background: var(--danger-light);
+  border: 1px solid var(--danger-border);
+  color: var(--danger-foreground);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+/* Info tooltip */
+.masterInfoTip {
+  display: flex;
+  margin-top: 1.5rem;
+  padding: 0.75rem;
+  background: var(--secondary);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  line-height: 1.4;
+}
+
+/* Loader and Empty State */
+.loadingArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 2rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  gap: 1rem;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--secondary);
+  border-top: 3px solid var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.errorArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 2rem;
+  background: var(--card);
+  border: 1px solid var(--danger-border);
+  border-radius: var(--radius);
+  text-align: center;
+  gap: 0.75rem;
+}
+
+.errorArea h3 {
+  color: var(--danger-foreground);
+  font-weight: 600;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 2rem;
+  text-align: center;
+  flex-grow: 1;
+}
+
+.emptyState p {
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+}
