@@ -157,27 +157,12 @@ export default function RegisterPage() {
     return new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY', maximumFractionDigits: 0 }).format(value);
   };
 
-  if (loading && hasCashDrawerSetup === null) {
+  if (loading) {
     return (
       <div className={styles.loadingArea}>
         <div className={styles.spinner}></div>
         <p>データを読み込み中...</p>
       </div>
-    );
-  }
-
-  if (hasCashDrawerSetup === false) {
-    return (
-      <>
-        <div className={styles.header}>
-          <div>
-            <h1 className={styles.title}>レジ会計（POS入力）</h1>
-            <p className={styles.subtitle}>注文アイテムをタップして入力し、お釣りの計算と会計確定を行います。</p>
-          </div>
-        </div>
-        <SupabaseSetupBanner />
-        <CashDrawerSetupWizard onSetupComplete={loadData} />
-      </>
     );
   }
 

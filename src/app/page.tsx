@@ -119,10 +119,6 @@ export default function DashboardPage() {
 
   if (!data) return null;
 
-  if (!data.hasCashDrawerSetup) {
-    return <CashDrawerSetupWizard onSetupComplete={loadDashboardData} />;
-  }
-
   // 3. Main Dashboard View
   return (
     <>

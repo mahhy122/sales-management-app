@@ -197,6 +197,50 @@ export default function CashPage() {
     setCoin1('0');
   };
 
+  const handleResetExpectedCashWithCounts = async () => {
+    if (countedTotal <= 0) {
+      alert('準備金として設定する金額は0円より大きくしてください。紙幣や硬貨の枚数を入力してください。');
+      return;
+    }
+
+    const confirm = window.confirm(
+      `現在の数え上げ合計金額 ${formatCurrency(countedTotal)} を、新しい「釣銭準備金」として登録しますか？\n\n` +
+      `【注意】この操作を行うと、ここから先の理論残高がこの金額から再スタートします。別日（営業開始時など）に釣銭準備金を更新したい場合に使用します。`
+    );
+
+    if (!confirm) return;
+
+    try {
+      setSubmittingLog(true);
+      const details = [];
+      if (b10000 > 0) details.push(`1万円札x${b10000}`);
+      if (b5000 > 0) details.push(`5千円札x${b5000}`);
+      if (b1000 > 0) details.push(`千円札x${b1000}`);
+      if (c500 > 0) details.push(`500円玉x${c500}`);
+      if (c100 > 0) details.push(`100円玉x${c100}`);
+      if (c50 > 0) details.push(`50円玉x${c50}`);
+      if (c10 > 0) details.push(`10円玉x${c10}`);
+      if (c5 > 0) details.push(`5円玉x${c5}`);
+      if (c1 > 0) details.push(`1円玉x${c1}`);
+      const description = `釣銭準備金（手動更新：${details.length > 0 ? details.join(', ') : '直接入力'}）`;
+
+      await addCashLog({
+        log_type: '準備金設定',
+        amount: countedTotal,
+        description: description
+      });
+
+      setCountSuccess(true);
+      handleResetCountForm();
+      await loadCashData();
+      setTimeout(() => setCountSuccess(false), 4000);
+    } catch (err: any) {
+      alert('準備金の更新に失敗しました: ' + err.message);
+    } finally {
+      setSubmittingLog(false);
+    }
+  };
+
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY', maximumFractionDigits: 0 }).format(value);
   };
@@ -464,6 +508,23 @@ export default function CashPage() {
                     style={{ width: '100%', padding: '0.85rem', fontSize: '1rem', marginTop: '0.5rem' }}
                   >
                     <span>{submittingCount ? '保存中...' : 'レジ監査（数え結果）を確定保存する'}</span>
+                  </button>
+
+                  <button 
+                    className="btn btn-secondary"
+                    disabled={submittingLog || countedTotal === 0}
+                    onClick={handleResetExpectedCashWithCounts}
+                    style={{ 
+                      width: '100%', 
+                      padding: '0.85rem', 
+                      fontSize: '1rem', 
+                      marginTop: '0.5rem',
+                      backgroundColor: 'var(--primary-light)',
+                      color: 'var(--primary)',
+                      borderColor: 'var(--primary-border)'
+                    }}
+                  >
+                    <span>{submittingLog ? '更新中...' : 'この金額を新しい釣銭準備金として登録 (更新)'}</span>
                   </button>
                 </div>
               </div>
