@@ -11,8 +11,9 @@ import {
   Plus,
   Minus
 } from 'lucide-react';
-import { getProducts, createOrder, Product } from '@/lib/supabase';
+import { getProducts, createOrder, getSalesDashboard, Product } from '@/lib/supabase';
 import SupabaseSetupBanner from '@/components/SupabaseSetupBanner';
+import CashDrawerSetupWizard from '@/components/CashDrawerSetupWizard';
 import styles from './register.module.css';
 
 interface CartItem {
@@ -23,6 +24,7 @@ interface CartItem {
 export default function RegisterPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hasCashDrawerSetup, setHasCashDrawerSetup] = useState<boolean | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [paymentReceived, setPaymentReceived] = useState('');
   
@@ -32,19 +34,24 @@ export default function RegisterPage() {
   const [lastChange, setLastChange] = useState<number | null>(null);
   const [lastTotal, setLastTotal] = useState<number | null>(null);
 
-  useEffect(() => {
-    async function loadMenu() {
-      try {
-        setLoading(true);
-        const data = await getProducts();
-        setProducts(data);
-      } catch (err) {
-        console.error('Failed to load products:', err);
-      } finally {
-        setLoading(false);
-      }
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [productsData, dashboardData] = await Promise.all([
+        getProducts(),
+        getSalesDashboard()
+      ]);
+      setProducts(productsData);
+      setHasCashDrawerSetup(dashboardData.hasCashDrawerSetup);
+    } catch (err) {
+      console.error('Failed to load data:', err);
+    } finally {
+      setLoading(false);
     }
-    loadMenu();
+  };
+
+  useEffect(() => {
+    loadData();
   }, []);
 
   // Cart operations
@@ -149,6 +156,30 @@ export default function RegisterPage() {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY', maximumFractionDigits: 0 }).format(value);
   };
+
+  if (loading && hasCashDrawerSetup === null) {
+    return (
+      <div className={styles.loadingArea}>
+        <div className={styles.spinner}></div>
+        <p>データを読み込み中...</p>
+      </div>
+    );
+  }
+
+  if (hasCashDrawerSetup === false) {
+    return (
+      <>
+        <div className={styles.header}>
+          <div>
+            <h1 className={styles.title}>レジ会計（POS入力）</h1>
+            <p className={styles.subtitle}>注文アイテムをタップして入力し、お釣りの計算と会計確定を行います。</p>
+          </div>
+        </div>
+        <SupabaseSetupBanner />
+        <CashDrawerSetupWizard onSetupComplete={loadData} />
+      </>
+    );
+  }
 
   return (
     <>

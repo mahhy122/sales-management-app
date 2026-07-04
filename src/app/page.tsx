@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { getSalesDashboard, deleteOrder, SalesDashboardData } from '@/lib/supabase';
 import SupabaseSetupBanner from '@/components/SupabaseSetupBanner';
+import CashDrawerSetupWizard from '@/components/CashDrawerSetupWizard';
 import styles from './page.module.css';
 
 export default function DashboardPage() {
@@ -117,6 +118,10 @@ export default function DashboardPage() {
   }
 
   if (!data) return null;
+
+  if (!data.hasCashDrawerSetup) {
+    return <CashDrawerSetupWizard onSetupComplete={loadDashboardData} />;
+  }
 
   // 3. Main Dashboard View
   return (

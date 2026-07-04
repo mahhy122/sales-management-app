@@ -75,6 +75,7 @@ export interface SalesDashboardData {
   // Cash stats [NEW]
   expectedCash: number;
   lastDiscrepancy: number | null;
+  hasCashDrawerSetup: boolean;
 }
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -134,24 +135,14 @@ const initialSourcing: SourcingItem[] = [
   { id: 's7', item_name: 'プラスチックスプーン', quantity: 150, unit: '本', cost: 800, purchase_date: '2026-06-26', notes: '資材消耗品' },
 ];
 
-// 初期注文データ
-const initialOrders: Order[] = [
-  { id: 'o1', total_amount: 600, payment_received: 1000, change_given: 400, created_at: new Date(Date.now() - 7200000).toISOString() },
-  { id: 'o2', total_amount: 1100, payment_received: 2000, change_given: 900, created_at: new Date(Date.now() - 1800000).toISOString() },
-];
+// 初期注文データ (最初は空から開始)
+const initialOrders: Order[] = [];
 
 // 初期注文明細データ
-const initialOrderItems: OrderItem[] = [
-  { id: 'oi1', order_id: 'o1', product_id: 'p1', product_name: 'カレー', quantity: 1, price: 500, subtotal: 500, created_at: new Date(Date.now() - 7200000).toISOString() },
-  { id: 'oi2', order_id: 'o1', product_id: 'p2', product_name: '水', quantity: 1, price: 100, subtotal: 100, created_at: new Date(Date.now() - 7200000).toISOString() },
-  { id: 'oi3', order_id: 'o2', product_id: 'p1', product_name: 'カレー', quantity: 2, price: 500, subtotal: 1000, created_at: new Date(Date.now() - 1800000).toISOString() },
-  { id: 'oi4', order_id: 'o2', product_id: 'p2', product_name: '水', quantity: 1, price: 100, subtotal: 100, created_at: new Date(Date.now() - 1800000).toISOString() },
-];
+const initialOrderItems: OrderItem[] = [];
 
-// 初期レジ金入出金ログ (釣銭準備金 3万円)
-const initialCashLogs: CashDrawerLog[] = [
-  { id: 'cl1', log_type: '準備金設定', amount: 30000, description: '朝の釣銭準備金（千円札x20, 500円x10, 100円x40, 50円x16, 10円x20）', created_at: new Date(Date.now() - 14400000).toISOString() }
-];
+// 初期レジ金入出金ログ (最初は未設定から開始)
+const initialCashLogs: CashDrawerLog[] = [];
 
 const getLocalStorage = <T>(key: string, initialData: T[]): T[] => {
   if (typeof window === 'undefined') return initialData;
@@ -486,6 +477,9 @@ export const getSalesDashboard = async (): Promise<SalesDashboardData> => {
   // 7. 最新の過不足額
   const lastDiscrepancy = cashCounts.length > 0 ? Number(cashCounts[0].discrepancy) : null;
 
+  // 8. 準備金設定が存在するかどうか
+  const hasCashDrawerSetup = cashLogs.some(l => l.log_type === '準備金設定');
+
   return {
     totalSales,
     totalCost,
@@ -495,6 +489,7 @@ export const getSalesDashboard = async (): Promise<SalesDashboardData> => {
     itemsSold,
     recentOrders,
     expectedCash,
-    lastDiscrepancy
+    lastDiscrepancy,
+    hasCashDrawerSetup
   };
 };

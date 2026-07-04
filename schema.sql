@@ -92,40 +92,7 @@ INSERT INTO public.sourcing (item_name, quantity, unit, cost, purchase_date, not
 ('プラスチックスプーン', 150, '本', 800, '2026-06-26', '資材消耗品')
 ON CONFLICT DO NOTHING;
 
--- レジ釣銭準備金の初期設定 (朝一番に釣銭用に30,000円を用意したと想定)
-INSERT INTO public.cash_drawer_logs (log_type, amount, description, created_at) VALUES
-('準備金設定', 30000, '釣銭準備金（千円札x20, 500円x10, 100円x40, 50円x16, 10円x20）', now() - interval '4 hours')
-ON CONFLICT DO NOTHING;
 
--- テスト用の売上履歴の初期データ
-DO $$
-DECLARE
-    order1_id UUID;
-    order2_id UUID;
-    prod_curry UUID;
-    prod_water UUID;
-BEGIN
-    SELECT id INTO prod_curry FROM public.products WHERE name = 'カレー';
-    SELECT id INTO prod_water FROM public.products WHERE name = '水';
-
-    -- 注文1: カレー x1, 水 x1 (計 600円)
-    INSERT INTO public.orders (total_amount, payment_received, change_given, created_at)
-    VALUES (600, 1000, 400, now() - interval '2 hours') RETURNING id INTO order1_id;
-
-    INSERT INTO public.order_items (order_id, product_id, product_name, quantity, price, subtotal, created_at)
-    VALUES 
-    (order1_id, prod_curry, 'カレー', 1, 500, 500, now() - interval '2 hours'),
-    (order1_id, prod_water, '水', 1, 100, 100, now() - interval '2 hours');
-
-    -- 注文2: カレー x2, 水 x1 (計 1100円)
-    INSERT INTO public.orders (total_amount, payment_received, change_given, created_at)
-    VALUES (1100, 2000, 900, now() - interval '30 minutes') RETURNING id INTO order2_id;
-
-    INSERT INTO public.order_items (order_id, product_id, product_name, quantity, price, subtotal, created_at)
-    VALUES 
-    (order2_id, prod_curry, 'カレー', 2, 500, 1000, now() - interval '30 minutes'),
-    (order2_id, prod_water, '水', 1, 100, 100, now() - interval '30 minutes');
-END $$;
 
 -- RLS (Row Level Security) の有効化 (パブリック読み書き許可)
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
