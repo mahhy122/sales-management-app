@@ -265,3 +265,30 @@
     width: 100%;
   }
 }
+
+.timeFilterRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.timeSeparator {
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+  font-weight: 700;
+}
+
+.clearTextLink {
+  background: transparent;
+  border: none;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--primary);
+  cursor: pointer;
+  padding: 0;
+}
+
+.clearTextLink:hover {
+  text-decoration: underline;
+}

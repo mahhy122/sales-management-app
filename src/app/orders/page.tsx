@@ -26,6 +26,8 @@ export default function OrdersPage() {
   const [selectedProduct, setSelectedProduct] = useState('all');
   const [dateFilter, setDateFilter] = useState<'all' | 'today' | 'custom'>('all');
   const [customDate, setCustomDate] = useState(new Date().toISOString().split('T')[0]);
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
 
   // Load orders data
   const loadOrders = async () => {
@@ -108,7 +110,19 @@ export default function OrdersPage() {
       matchesDate = orderDateLocal === customDate;
     }
 
-    return matchesSearch && matchesProduct && matchesDate;
+    // D. Time filter
+    let matchesTime = true;
+    if (startTime || endTime) {
+      const orderDate = new Date(order.created_at || '');
+      const hours = orderDate.getHours().toString().padStart(2, '0');
+      const minutes = orderDate.getMinutes().toString().padStart(2, '0');
+      const orderTimeStr = `${hours}:${minutes}`;
+
+      if (startTime && orderTimeStr < startTime) matchesTime = false;
+      if (endTime && orderTimeStr > endTime) matchesTime = false;
+    }
+
+    return matchesSearch && matchesProduct && matchesDate && matchesTime;
   });
 
   // 2. TALLY CALCULATIONS (From filtered orders)
@@ -257,6 +271,39 @@ export default function OrdersPage() {
                       />
                     </div>
                   )}
+                </div>
+              </div>
+
+              {/* Time Filter */}
+              <div className={styles.filterGroup} style={{ flexGrow: 1 }}>
+                <div className="flex-between" style={{ marginBottom: '0.25rem' }}>
+                  <label className={styles.filterLabel}>時間帯で絞り込み</label>
+                  {(startTime || endTime) && (
+                    <button 
+                      type="button" 
+                      className={styles.clearTextLink}
+                      onClick={() => { setStartTime(''); setEndTime(''); }}
+                    >
+                      クリア
+                    </button>
+                  )}
+                </div>
+                <div className={styles.timeFilterRow}>
+                  <input 
+                    type="time" 
+                    className="form-input"
+                    style={{ height: '38px', fontSize: '0.875rem', padding: '0.35rem 0.5rem' }}
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
+                  />
+                  <span className={styles.timeSeparator}>〜</span>
+                  <input 
+                    type="time" 
+                    className="form-input"
+                    style={{ height: '38px', fontSize: '0.875rem', padding: '0.35rem 0.5rem' }}
+                    value={endTime}
+                    onChange={(e) => setEndTime(e.target.value)}
+                  />
                 </div>
               </div>
             </div>
