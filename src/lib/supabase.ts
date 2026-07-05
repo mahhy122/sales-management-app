@@ -552,9 +552,39 @@ export const getSalesDashboard = async (): Promise<SalesDashboardData> => {
     };
   });
 
-  // 6. レジ内理論金残高
-  const logsSum = cashLogs.reduce((sum, l) => sum + Number(l.amount), 0);
-  const expectedCash = logsSum + totalSales;
+  // 6. レジ内理論金残高 (Baseline setup reset + subsequent logs & sales)
+  const chronologicalLogs = [...cashLogs].sort(
+    (a, b) => new Date(a.created_at || '').getTime() - new Date(b.created_at || '').getTime()
+  );
+
+  const lastSetupIndex = chronologicalLogs.map(l => l.log_type).lastIndexOf('準備金設定');
+  
+  let expectedCash = 0;
+  
+  if (lastSetupIndex !== -1) {
+    const baselineAmount = Number(chronologicalLogs[lastSetupIndex].amount);
+    const setupTime = new Date(chronologicalLogs[lastSetupIndex].created_at || '').getTime();
+    
+    // Sum active logs after the last setup
+    const activeLogs = chronologicalLogs.slice(lastSetupIndex + 1);
+    const activeLogsSum = activeLogs.reduce((sum, l) => {
+      const amt = l.log_type === '金銭回収' ? -Math.abs(Number(l.amount)) : Number(l.amount);
+      return sum + amt;
+    }, 0);
+    
+    // Sum sales after setup time
+    const activeSales = orders.filter(o => new Date(o.created_at || '').getTime() > setupTime);
+    const activeSalesSum = activeSales.reduce((sum, o) => sum + Number(o.total_amount), 0);
+    
+    expectedCash = baselineAmount + activeLogsSum + activeSalesSum;
+  } else {
+    // If no setup found, sum all logs and sales
+    const activeLogsSum = cashLogs.reduce((sum, l) => {
+      const amt = l.log_type === '金銭回収' ? -Math.abs(Number(l.amount)) : Number(l.amount);
+      return sum + amt;
+    }, 0);
+    expectedCash = activeLogsSum + totalSales;
+  }
 
   // 7. 最新の過不足額
   const lastDiscrepancy = cashCounts.length > 0 ? Number(cashCounts[0].discrepancy) : null;

@@ -125,7 +125,7 @@ export default function CashPage() {
       setSubmittingLog(true);
       await addCashLog({
         log_type: logType,
-        amount: amountNum,
+        amount: logType === '金銭回収' ? -Math.abs(amountNum) : amountNum,
         description: logDescription.trim()
       });
 
@@ -695,7 +695,8 @@ export default function CashPage() {
                           );
                         } else {
                           const lItem = item as unknown as CashDrawerLog;
-                          const isNegative = Number(lItem.amount) < 0;
+                          const amountVal = lItem.log_type === '金銭回収' ? -Math.abs(Number(lItem.amount)) : Number(lItem.amount);
+                          const isNegative = amountVal < 0;
                           return (
                             <div key={lItem.id || index} className={styles.timelineItem}>
                               <div className={`${styles.timelineBadge} ${
@@ -716,7 +717,7 @@ export default function CashPage() {
                                     <span>レジ金両替記録 (総額変化なし)</span>
                                   ) : (
                                     <span>
-                                      金額操作: {isNegative ? '出金' : '入金'} {formatCurrency(Math.abs(lItem.amount))}
+                                      金額操作: {isNegative ? '出金' : '入金'} {formatCurrency(Math.abs(amountVal))}
                                     </span>
                                   )}
                                 </div>
