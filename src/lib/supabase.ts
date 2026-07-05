@@ -76,6 +76,9 @@ export interface SalesDashboardData {
   expectedCash: number;
   lastDiscrepancy: number | null;
   hasCashDrawerSetup: boolean;
+  // Chart Data [NEW]
+  salesTrend: Array<{ time: string; amount: number }>;
+  hourlySales: Array<{ hour: string; amount: number; count: number }>;
 }
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -559,6 +562,64 @@ export const getSalesDashboard = async (): Promise<SalesDashboardData> => {
   // 8. 準備金設定が存在するかどうか
   const hasCashDrawerSetup = cashLogs.some(l => l.log_type === '準備金設定');
 
+  // 9. 売上推移 (Sales Trend)
+  const chronologicalOrders = [...orders].sort(
+    (a, b) => new Date(a.created_at || '').getTime() - new Date(b.created_at || '').getTime()
+  );
+
+  let runningSum = 0;
+  const salesTrend = chronologicalOrders.map(order => {
+    runningSum += Number(order.total_amount);
+    const date = new Date(order.created_at || '');
+    const timeStr = date.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+    return {
+      time: timeStr,
+      amount: runningSum
+    };
+  });
+
+  // If empty, add a default 0 point
+  if (salesTrend.length === 0) {
+    salesTrend.push({ time: '09:00', amount: 0 });
+  } else {
+    // Add a starting point at morning (30 mins before first sale)
+    const firstOrderTime = new Date(chronologicalOrders[0].created_at || '').getTime();
+    const startTimeStr = new Date(firstOrderTime - 1800000).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+    salesTrend.unshift({ time: startTimeStr, amount: 0 });
+  }
+
+  // 10. 時間帯別の売上 (Hourly Sales)
+  const hourlyMap: { [hour: number]: { amount: number; count: number } } = {};
+  
+  // Define standard hours for school festival (9:00 to 17:00)
+  const startHour = 9;
+  const endHour = 17;
+  for (let h = startHour; h <= endHour; h++) {
+    hourlyMap[h] = { amount: 0, count: 0 };
+  }
+
+  // Populate from actual orders
+  orders.forEach(order => {
+    const date = new Date(order.created_at || '');
+    const hour = date.getHours();
+    if (hour >= 0 && hour <= 23) {
+      if (!hourlyMap[hour]) {
+        hourlyMap[hour] = { amount: 0, count: 0 };
+      }
+      hourlyMap[hour].amount += Number(order.total_amount);
+      hourlyMap[hour].count += 1;
+    }
+  });
+
+  // Convert map to sorted array
+  const hourlySales = Object.entries(hourlyMap)
+    .map(([h, data]) => ({
+      hour: `${h}:00`,
+      amount: data.amount,
+      count: data.count
+    }))
+    .sort((a, b) => parseInt(a.hour) - parseInt(b.hour));
+
   return {
     totalSales,
     totalCost,
@@ -569,6 +630,8 @@ export const getSalesDashboard = async (): Promise<SalesDashboardData> => {
     recentOrders,
     expectedCash,
     lastDiscrepancy,
-    hasCashDrawerSetup
+    hasCashDrawerSetup,
+    salesTrend,
+    hourlySales
   };
 };

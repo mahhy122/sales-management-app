@@ -13,7 +13,9 @@ import {
   Utensils, 
   AlertCircle,
   TrendingDown as LossIcon,
-  ArrowRight
+  ArrowRight,
+  BarChart3,
+  LineChart
 } from 'lucide-react';
 import { getSalesDashboard, deleteOrder, SalesDashboardData } from '@/lib/supabase';
 import SupabaseSetupBanner from '@/components/SupabaseSetupBanner';
@@ -24,6 +26,7 @@ export default function DashboardPage() {
   const [data, setData] = useState<SalesDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [hoveredPoint, setHoveredPoint] = useState<{ x: number; y: number; time: string; amount: number } | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const loadDashboardData = async () => {
@@ -118,6 +121,30 @@ export default function DashboardPage() {
   }
 
   if (!data) return null;
+
+  // Calculate coordinates for Cumulative Sales Trend
+  const maxTrendAmount = Math.max(...data.salesTrend.map(t => t.amount), 0);
+  const trendMax = maxTrendAmount > 0 ? maxTrendAmount : 1000;
+
+  const svgWidth = 500;
+  const svgHeight = 200;
+  const paddingX = 40;
+  const paddingY = 25;
+  const chartWidth = svgWidth - paddingX * 2;
+  const chartHeight = svgHeight - paddingY * 2;
+
+  const trendPoints = data.salesTrend.map((pt, idx) => {
+    const x = paddingX + (data.salesTrend.length > 1 ? (idx / (data.salesTrend.length - 1)) * chartWidth : chartWidth / 2);
+    const y = svgHeight - paddingY - (pt.amount / trendMax) * chartHeight;
+    return { x, y, time: pt.time, amount: pt.amount };
+  });
+
+  const lineD = trendPoints.length > 0 ? `M ${trendPoints[0].x} ${trendPoints[0].y} ` + trendPoints.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ') : '';
+  const areaD = trendPoints.length > 0 ? `${lineD} L ${trendPoints[trendPoints.length - 1].x} ${svgHeight - paddingY} L ${trendPoints[0].x} ${svgHeight - paddingY} Z` : '';
+
+  // Calculate max value for Hourly Sales Bar Chart
+  const maxHourlyAmount = Math.max(...data.hourlySales.map(h => h.amount), 0);
+  const hourlyMax = maxHourlyAmount > 0 ? maxHourlyAmount : 1000;
 
   // 3. Main Dashboard View
   return (
@@ -227,6 +254,171 @@ export default function DashboardPage() {
           <div className={styles.statValue}>{data.margin} %</div>
           <div className={styles.statFooter}>
             <span>売上に対する純利益の割合</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Sales Analytics Graphs */}
+      <div className="grid-cols-2" style={{ marginBottom: '1.5rem', gap: '1.5rem' }}>
+        {/* Chart 1: Cumulative Sales Trend */}
+        <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
+          <div className={styles.chartHeader}>
+            <h3 className={styles.chartTitle}>
+              <LineChart size={18} className="text-primary" />
+              <span>売上累積推移 (時間経過)</span>
+            </h3>
+            <span className={styles.desc}>売上累計</span>
+          </div>
+
+          <div className={styles.chartBody}>
+            <div className={styles.chartWrapperRelative}>
+              <svg className={styles.chartSvg} viewBox={`0 0 ${svgWidth} ${svgHeight}`}>
+                <defs>
+                  <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.3" />
+                    <stop offset="100%" stopColor="var(--primary)" stopOpacity="0.0" />
+                  </linearGradient>
+                </defs>
+
+                {/* Y-axis helper grid lines */}
+                {[0, 0.25, 0.5, 0.75, 1].map((ratio, i) => {
+                  const yVal = svgHeight - paddingY - ratio * chartHeight;
+                  const labelVal = ratio * trendMax;
+                  return (
+                    <g key={i}>
+                      <line 
+                        x1={paddingX} 
+                        y1={yVal} 
+                        x2={svgWidth - paddingX} 
+                        y2={yVal} 
+                        stroke="#e2e8f0" 
+                        strokeWidth="1" 
+                        strokeDasharray="4 4" 
+                      />
+                      <text 
+                        x={paddingX - 8} 
+                        y={yVal + 3} 
+                        textAnchor="end" 
+                        fontSize="9" 
+                        fill="#94a3b8" 
+                        fontWeight="600"
+                      >
+                        {formatCurrency(labelVal).replace('円', '')}
+                      </text>
+                    </g>
+                  );
+                })}
+
+                {/* Filled Area */}
+                {areaD && (
+                  <path d={areaD} fill="url(#trendGradient)" />
+                )}
+
+                {/* Path Line */}
+                {lineD && (
+                  <path 
+                    d={lineD} 
+                    fill="none" 
+                    stroke="var(--primary)" 
+                    strokeWidth="3" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                  />
+                )}
+
+                {/* Interactive Dots */}
+                {trendPoints.map((pt, idx) => (
+                  <circle
+                    key={idx}
+                    cx={pt.x}
+                    cy={pt.y}
+                    r={hoveredPoint?.time === pt.time ? '7' : '4.5'}
+                    fill={hoveredPoint?.time === pt.time ? 'var(--primary)' : 'white'}
+                    stroke="var(--primary)"
+                    strokeWidth={hoveredPoint?.time === pt.time ? '3' : '2.5'}
+                    style={{ cursor: 'pointer', transition: 'all 0.1s ease' }}
+                    onMouseEnter={(e) => {
+                      setHoveredPoint({
+                        x: (pt.x / svgWidth) * 100, // percentage position
+                        y: (pt.y / svgHeight) * 100,
+                        time: pt.time,
+                        amount: pt.amount
+                      });
+                    }}
+                    onMouseLeave={() => setHoveredPoint(null)}
+                  />
+                ))}
+
+                {/* X-axis labels */}
+                {trendPoints.length > 0 && [0, Math.floor(trendPoints.length / 2), trendPoints.length - 1].map((idx) => {
+                  const pt = trendPoints[idx];
+                  if (!pt) return null;
+                  return (
+                    <text
+                      key={idx}
+                      x={pt.x}
+                      y={svgHeight - 6}
+                      textAnchor="middle"
+                      fontSize="9"
+                      fill="#94a3b8"
+                      fontWeight="600"
+                    >
+                      {pt.time}
+                    </text>
+                  );
+                })}
+              </svg>
+
+              {/* Line Chart Hover Tooltip */}
+              {hoveredPoint && (
+                <div 
+                  className={styles.chartTooltip}
+                  style={{ 
+                    left: `${hoveredPoint.x}%`, 
+                    top: `${hoveredPoint.y}%` 
+                  }}
+                >
+                  <span className={styles.tooltipTitle}>{hoveredPoint.time} 時点</span>
+                  <span className={styles.tooltipValue}>{formatCurrency(hoveredPoint.amount)}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Chart 2: Hourly Sales Bar Chart */}
+        <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
+          <div className={styles.chartHeader}>
+            <h3 className={styles.chartTitle}>
+              <BarChart3 size={18} className="text-primary" />
+              <span>時間帯別の売上高 (時間毎)</span>
+            </h3>
+            <span className={styles.desc}>売上ピーク</span>
+          </div>
+
+          <div className={styles.chartBody}>
+            <div className={styles.barGrid}>
+              {data.hourlySales.map((item, idx) => {
+                const heightPercent = hourlyMax > 0 ? (item.amount / hourlyMax) * 100 : 0;
+                return (
+                  <div key={idx} className={styles.barCol}>
+                    <div className={styles.barWrapper}>
+                      <div 
+                        className={styles.bar} 
+                        style={{ height: `${Math.max(2, heightPercent)}%` }}
+                      >
+                        {/* Pure CSS Tooltip popup inside the bar */}
+                        <div className={styles.barTooltip}>
+                          <strong style={{ color: '#38bdf8' }}>{formatCurrency(item.amount)}</strong>
+                          <span style={{ color: '#94a3b8', fontSize: '0.65rem' }}>{item.count} 件の会計</span>
+                        </div>
+                      </div>
+                    </div>
+                    <span className={styles.barLabel}>{item.hour}</span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
