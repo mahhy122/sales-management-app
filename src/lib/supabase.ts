@@ -409,6 +409,35 @@ export const deleteOrder = async (orderId: string): Promise<void> => {
   }
 };
 
+export const getOrders = async (): Promise<Order[]> => {
+  let orders: Order[] = [];
+  let orderItems: OrderItem[] = [];
+
+  if (supabase) {
+    const [ordersRes, orderItemsRes] = await Promise.all([
+      supabase.from('orders').select('*').order('created_at', { ascending: false }),
+      supabase.from('order_items').select('*')
+    ]);
+
+    if (ordersRes.error) throw ordersRes.error;
+    if (orderItemsRes.error) throw orderItemsRes.error;
+
+    orders = ordersRes.data || [];
+    orderItems = orderItemsRes.data || [];
+  } else {
+    orders = getLocalStorage<Order>(MOCK_ORDERS_KEY, initialOrders);
+    orderItems = getLocalStorage<OrderItem>(MOCK_ORDER_ITEMS_KEY, initialOrderItems);
+  }
+
+  return orders.map(order => {
+    const items = orderItems.filter(oi => oi.order_id === order.id);
+    return {
+      ...order,
+      items
+    };
+  });
+};
+
 // 7. INTEGRATED DASHBOARD AGGREGATES
 export const getSalesDashboard = async (): Promise<SalesDashboardData> => {
   let orders: Order[] = [];
