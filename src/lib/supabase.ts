@@ -175,6 +175,56 @@ export const getProducts = async (): Promise<Product[]> => {
   }
 };
 
+export const addProduct = async (name: string, price: number): Promise<Product> => {
+  if (supabase) {
+    const { data, error } = await supabase
+      .from('products')
+      .insert([{ name, price }])
+      .select();
+    if (error) throw error;
+    return data[0];
+  } else {
+    const products = getLocalStorage<Product>(MOCK_PRODUCTS_KEY, initialProducts);
+    const newProduct: Product = {
+      id: 'p_' + Math.random().toString(36).substr(2, 9),
+      name,
+      price,
+      created_at: new Date().toISOString()
+    };
+    products.push(newProduct);
+    setLocalStorage(MOCK_PRODUCTS_KEY, products);
+    return newProduct;
+  }
+};
+
+export const updateProduct = async (id: string, name: string, price: number): Promise<Product> => {
+  if (supabase) {
+    const { data, error } = await supabase
+      .from('products')
+      .update({ name, price })
+      .eq('id', id)
+      .select();
+    if (error) throw error;
+    return data[0];
+  } else {
+    const products = getLocalStorage<Product>(MOCK_PRODUCTS_KEY, initialProducts);
+    const updated = products.map(p => p.id === id ? { ...p, name, price } : p);
+    setLocalStorage(MOCK_PRODUCTS_KEY, updated);
+    return updated.find(p => p.id === id)!;
+  }
+};
+
+export const deleteProduct = async (id: string): Promise<void> => {
+  if (supabase) {
+    const { error } = await supabase.from('products').delete().eq('id', id);
+    if (error) throw error;
+  } else {
+    const products = getLocalStorage<Product>(MOCK_PRODUCTS_KEY, initialProducts);
+    const filtered = products.filter(p => p.id !== id);
+    setLocalStorage(MOCK_PRODUCTS_KEY, filtered);
+  }
+};
+
 // 2. SOURCING (経費) API
 export const getSourcing = async (): Promise<SourcingItem[]> => {
   if (supabase) {

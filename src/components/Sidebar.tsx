@@ -12,7 +12,8 @@ import {
   X, 
   TrendingUp,
   LogOut,
-  History
+  History,
+  Tag
 } from 'lucide-react';
 import styles from './Sidebar.module.css';
 
@@ -24,6 +25,7 @@ export default function Sidebar() {
     { name: 'ダッシュボード', path: '/', icon: LayoutDashboard },
     { name: 'レジ会計', path: '/register', icon: Calculator },
     { name: '注文履歴', path: '/orders', icon: History },
+    { name: 'メニュー管理', path: '/products', icon: Tag },
     { name: '仕入れ管理', path: '/sourcing', icon: Truck },
     { name: 'レジ金管理', path: '/cash', icon: Coins },
   ];

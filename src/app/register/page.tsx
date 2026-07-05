@@ -34,6 +34,7 @@ export default function RegisterPage() {
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
   const [lastChange, setLastChange] = useState<number | null>(null);
   const [lastTotal, setLastTotal] = useState<number | null>(null);
+  const [discount, setDiscount] = useState<number>(0);
 
   const loadData = async () => {
     try {
@@ -90,11 +91,13 @@ export default function RegisterPage() {
   const clearCart = () => {
     setCart([]);
     setPaymentReceived('');
+    setDiscount(0);
     setCheckoutSuccess(false);
   };
 
   // Calculations
-  const totalAmount = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+  const subtotalAmount = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+  const totalAmount = Math.max(0, subtotalAmount - discount);
   const cashReceivedNum = Number(paymentReceived) || 0;
   const changeDue = cashReceivedNum - totalAmount;
   const isPaymentSufficient = cashReceivedNum >= totalAmount;
@@ -129,6 +132,16 @@ export default function RegisterPage() {
         price: item.product.price
       }));
 
+      // Apply negative price discount line item if discount is set
+      if (discount > 0) {
+        orderItemsData.push({
+          product_id: null as any,
+          product_name: `値引き (-${discount}円)`,
+          quantity: 1,
+          price: -discount
+        });
+      }
+
       await createOrder(
         {
           total_amount: totalAmount,
@@ -146,6 +159,7 @@ export default function RegisterPage() {
       // Clear cart
       setCart([]);
       setPaymentReceived('');
+      setDiscount(0);
     } catch (err: any) {
       console.error('Checkout failed:', err);
       alert('会計登録に失敗しました: ' + err.message);
@@ -297,6 +311,59 @@ export default function RegisterPage() {
               {/* Sum calculations */}
               {cart.length > 0 && (
                 <div className={styles.summaryBlock}>
+                  {/* Discount Section */}
+                  <div className={styles.discountSection}>
+                    <div className="flex-between" style={{ marginBottom: '0.25rem' }}>
+                      <span className={styles.discountLabel}>値引き・割引 (円)</span>
+                      {discount > 0 && (
+                        <button type="button" className={styles.discountClearBtn} onClick={() => setDiscount(0)}>
+                          クリア
+                        </button>
+                      )}
+                    </div>
+                    
+                    <div className={styles.discountControlRow}>
+                      <KeypadInput
+                        type="text"
+                        className={styles.discountInput}
+                        placeholder="0"
+                        value={discount === 0 ? '' : discount.toString()}
+                        onChange={(val) => setDiscount(Number(val) || 0)}
+                        title="値引き・割引額の入力"
+                        suffix="円"
+                        style={{ width: '80px', height: '34px', fontSize: '0.85rem' }}
+                      />
+                      
+                      <div className={styles.quickDiscountRow}>
+                        <button type="button" className={styles.quickDiscountBtn} onClick={() => setDiscount(50)}>
+                          -50円
+                        </button>
+                        <button type="button" className={styles.quickDiscountBtn} onClick={() => setDiscount(100)}>
+                          -100円
+                        </button>
+                        <button type="button" className={styles.quickDiscountBtn} onClick={() => setDiscount(200)}>
+                          -200円
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className={styles.summaryDivider} />
+
+                  {/* Subtotal & Discount breakdown if set */}
+                  {discount > 0 && (
+                    <div className={styles.summaryRow}>
+                      <span className="text-muted" style={{ fontSize: '0.8rem' }}>小計:</span>
+                      <span className="font-semibold" style={{ fontSize: '0.85rem' }}>{formatCurrency(subtotalAmount)}</span>
+                    </div>
+                  )}
+                  {discount > 0 && (
+                    <div className={styles.summaryRow} style={{ marginTop: '-0.25rem' }}>
+                      <span className="text-danger" style={{ fontSize: '0.8rem' }}>値引き:</span>
+                      <span className="font-bold text-danger" style={{ fontSize: '0.85rem' }}>-{formatCurrency(discount)}</span>
+                    </div>
+                  )}
+
                   <div className={styles.summaryRowBig}>
                     <span>合計金額:</span>
                     <span className={styles.summaryTotal}>{formatCurrency(totalAmount)}</span>

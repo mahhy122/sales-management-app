@@ -1,0 +1,178 @@
+.header {
+  margin-bottom: 1.5rem;
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--foreground);
+  letter-spacing: -0.02em;
+  margin-bottom: 0.25rem;
+}
+
+.subtitle {
+  font-size: 0.9rem;
+  color: var(--muted-foreground);
+}
+
+/* Loading & Error Areas */
+.loadingArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  gap: 1rem;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.errorArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+  background: var(--danger-light);
+  border: 1px solid var(--danger-border);
+  border-radius: var(--radius);
+  color: var(--danger-foreground);
+  gap: 0.5rem;
+}
+
+.listCard {
+  grid-column: span 2;
+}
+
+.productName {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+/* Row Highlight in Edit Mode */
+.editingRow {
+  background: var(--primary-light) !important;
+  border-left: 3px solid var(--primary);
+}
+
+/* Action Buttons Cell */
+.actionCell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.editBtn, .deleteBtn {
+  background: transparent;
+  border: none;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  padding: 0.45rem;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+
+.editBtn:hover {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.deleteBtn:hover {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+/* Input Fields with Unit */
+.inputWithUnit {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.inputWithUnit input {
+  padding-right: 2.5rem;
+}
+
+.unitRight {
+  position: absolute;
+  right: 1rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--muted-foreground);
+}
+
+/* Form Actions Row */
+.formActions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  width: 100%;
+}
+
+/* Alert Boxes */
+.formSuccessAlert {
+  display: flex;
+  align-items: center;
+  background: var(--success-light);
+  border: 1px solid var(--success-border);
+  color: var(--success-foreground);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.825rem;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+  line-height: 1.4;
+}
+
+.formErrorAlert {
+  background: var(--danger-light);
+  border: 1px solid var(--danger-border);
+  color: var(--danger-foreground);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.825rem;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+  line-height: 1.4;
+}
+
+/* Empty State */
+.emptyState {
+  padding: 4rem 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.emptyState p {
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+  margin: 0;
+}
+
+@media (max-width: 992px) {
+  .listCard {
+    grid-column: span 3;
+  }
+}
