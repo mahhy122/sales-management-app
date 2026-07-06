@@ -1,36 +1,166 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 学祭レジ＆利益管理 POSシステム (SalesManager)
 
-## Getting Started
+本システムは、学園祭やサークルイベント等での利用に特化した、タッチパネル操作対応のPOSレジ・利益・経費・レジ金管理アプリケーションです。
+クラウドデータベースの **Supabase** とブラウザの **LocalStorage（オフライン・開発用）** の両方に自動対応するハイブリッド設計を採用しています。
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 🌟 システムの主要機能
+
+### 1. 📊 ダッシュボード (売上・利益の可視化)
+* **リアルタイム集計**: 売上総額、仕入れ経費、純利益、利益率、注文数などをリアルタイムで自動計算。
+* **インタラクティブ売上推移グラフ**: 売上の累積金額を時間軸に沿って折れ線グラフ（SVG）で描画。ホバーによる金額のツールチップ表示に対応。
+* **時間帯別・商品別棒グラフ**: どの時間帯にどの商品が何個売れたかを棒グラフで視覚化。
+* **商品売上ランキング**: 販売個数に応じたランキング表示。
+
+### 2. 🛒 POSレジ会計画面
+* **タッチ操作対応テンキー**: 商品の数量や金額、お預かり金額などを、キーボードなしで直感的に入力できるカスタム電卓ポップアップを搭載。
+* **値引き・割引対応**: 注文単位での「固定額値引き（例: -100円）」または「比率割引（例: 10%引き）」を適用可能。値引き分は売上明細へマイナス価格の行として透過的に記録。
+* **お釣り自動計算**: お預かり金額の入力に応じて、即座にお釣り額を大きく表示。
+
+### 3. 📅 マルチイベント（学祭）切り替え・データ分離
+* **データ接続先切り替え**: 画面（ログイン画面・サイドバー）の上部から、表示する学祭（例：「エコフェス2026」、「学祭2027」など）を選択・切り替え可能。
+* **新規イベントの立ち上げ**: 画面上の操作のみで新しいイベントをワンタップで作成でき、自動的に新しいイベントデータが古いデータと混ざらずに独立して保存されます。
+* **セルフヒーリング (自己修復) 機能**: データベースのイベント情報が空の場合、最初のロード時にシステムが自動的にデフォルトイベント（「エコフェス2026」）を挿入・アクティブ化します。
+
+### 4. 🕒 注文履歴・取消管理
+* **詳細フィルタリング**: 日付範囲、商品名、注文ID、さらに「時・分 (HH:MM)」単位での時間絞り込みに対応。
+* **注文の払い戻し・取消 (Void)**: 誤って打ってしまった会計を履歴から一覧で選択し、ワンタップで安全に取り消す（売上から除外する）ことができます。
+
+### 5. 🏷️ メニュー（商品）管理
+* **動的な商品管理**: 販売商品の追加、価格変更、削除をタッチパネル用キーパッドを用いてリアルタイムで実行可能。
+
+### 6. 🚚 仕入れ（経費）管理
+* **仕入れ記録**: 食材や消耗品（カレー皿、スプーンなど）の仕入れ価格、数量、単位、購入日、メモを一元管理。
+
+### 7. 🪙 レジ金管理（入出金・現金監査）
+* **準備金（ベースライン）設定**: 営業開始時に入れた釣銭準備金を設定。**最も新しい準備金設定のタイミングで、売上や入出金の累積が自動的にリセットされ、当日の期待残高が計算**されます（日をまたいだ売上の累積混同を防ぎます）。
+* **両替・金銭回収ログ**: 釣銭補充、売上の金銭回収（出金はマイナス値として記録）、両替などを記録。
+* **現金監査 (Cash Audit)**: レジ内の硬貨・紙幣の枚数（1万〜1円）を数えて入力するだけで、理論上のレジ金残高と実際の現金差異（過不足金）を1秒で自動算出。
+
+---
+
+## 🗄️ データベース構造 (Database Schema)
+
+Supabase (PostgreSQL) 上に以下のテーブルが構築されています。各トランザクションデータは `event_id` を介して各学祭イベントに紐付けられています。
+
+```
+[events (イベント)]
+    │
+    ├───< orders (注文) ───< order_items (注文明細)
+    ├───< sourcing (仕入れ・経費)
+    ├───< cash_drawer_logs (レジ入出金ログ)
+    └───< cash_counts (レジ監査記録)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 1. `events` (イベント定義テーブル)
+* `id` (UUID, 主キー)
+* `name` (TEXT, ユニーク): イベント名（例: エコフェス2026）
+* `is_active` (BOOLEAN): 現在の稼働状態
+* `created_at` (TIMESTAMPTZ)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 2. `products` (商品マスター)
+* `id` (UUID, 主キー)
+* `name` (TEXT, ユニーク)
+* `price` (INTEGER)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 3. `orders` (売上注文ヘッダー)
+* `id` (UUID, 主キー)
+* `total_amount` (INTEGER): 総支払額（値引き後）
+* `payment_received` (INTEGER): お預かり金額
+* `change_given` (INTEGER): お釣り
+* `event_id` (UUID, 外部キー)
+* `created_at` (TIMESTAMPTZ)
 
-## Learn More
+### 4. `order_items` (注文明細)
+* `id` (UUID, 主キー)
+* `order_id` (UUID, 外部キー): `orders`へ接続
+* `product_id` (UUID, 外部キー, NULL可)
+* `product_name` (TEXT)
+* `quantity` (INTEGER)
+* `price` (INTEGER): 単価
+* `subtotal` (INTEGER): 小計
 
-To learn more about Next.js, take a look at the following resources:
+### 5. `sourcing` (経費・仕入れ情報)
+* `id` (UUID, 主キー)
+* `item_name` (TEXT)
+* `quantity` (NUMERIC)
+* `unit` (TEXT)
+* `cost` (INTEGER): 仕入れ金額
+* `purchase_date` (DATE)
+* `notes` (TEXT)
+* `event_id` (UUID, 外部キー)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 6. `cash_drawer_logs` (レジ内現金入出金履歴)
+* `id` (UUID, 主キー)
+* `log_type` (TEXT): `'準備金設定' | '金銭回収' | '釣銭補充' | '両替' | 'その他'`
+* `amount` (INTEGER): 入金はプラス、出金・回収はマイナス値
+* `description` (TEXT)
+* `event_id` (UUID, 外部キー)
+* `created_at` (TIMESTAMPTZ)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 7. `cash_counts` (現金監査記録)
+* `id` (UUID, 主キー)
+* `bill_10000` ~ `coin_1` (INTEGER): 各金種の枚数
+* `counted_total` (INTEGER): 実測現金合計
+* `expected_total` (INTEGER): 計算上の理論現金残高
+* `discrepancy` (INTEGER): 過不足金
+* `event_id` (UUID, 外部キー)
+* `created_at` (TIMESTAMPTZ)
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🧮 レジ内現金理論値 (Expected Cash) の計算ロジック
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+本システムでは、以下の数式を用いて期待残高（理論値）を算出しています。
+
+$$
+\text{期待残高} = \text{最新準備金額} + \sum (\text{以降の売上金額}) + \sum (\text{以降の入出金ログ})
+$$
+
+### 💡 営業開始（ベースライン）リセット仕様
+監査時のズレや前日の残高累積を防ぐため、**「準備金設定（釣銭準備）」**が記録されると、それ以前の売上や入出金は集計対象外としてクリアされ、その時点の準備金額をベースに新規集計を開始します。
+
+---
+
+## 🔌 API設計：ハイブリッド動作モード
+
+APIレイヤ (`src/lib/supabase.ts`) は環境変数を自動チェックし、以下の2つのモードで透過的に動作します。
+
+```
+[フロントUI] ➔ (共通API関数) ➔ [環境変数のチェック]
+                                   ├── (有り) ➔ [Supabaseクラウド]
+                                   └── (無し) ➔ [LocalStorage (モック)]
+```
+
+* **クラウドモード (Vercel等)**: `.env.local` に有効なSupabase of 接続キーが記述されている場合、直接PostgreSQLのクラウドデータベースへクエリを投げます。
+* **モックモード (オフライン・開発)**: 接続キーがない場合、ブラウザの `localStorage` 上に構築された疑似データベースへと自動フォールバックします。
+
+---
+
+## 🚀 起動・開発・デプロイ方法
+
+### 1. 必要要件
+* **Node.js**: v18以上
+
+### 2. 環境変数の設定 (`.env.local`)
+プロジェクトのルートに `.env.local` を作成し、以下を設定します。
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+NEXT_PUBLIC_APP_PASSWORD=your_gatekeeper_password # 例: curry2026 (デフォルト値)
+```
+
+### 3. ローカル開発サーバーの起動
+```bash
+npm install
+npm run dev
+```
+ブラウザで [http://localhost:3000](http://localhost:3000) を開きます。
+
+### 4. プロダクションビルドと検証
+```bash
+npm run build
+npm start
+```
