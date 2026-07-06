@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
@@ -13,13 +13,66 @@ import {
   TrendingUp,
   LogOut,
   History,
-  Tag
+  Tag,
+  Plus,
+  CalendarRange
 } from 'lucide-react';
+import { getEvents, createEvent, getFilterEventId, Event } from '@/lib/supabase';
 import styles from './Sidebar.module.css';
 
 export default function Sidebar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+
+  const [events, setEvents] = useState<Event[]>([]);
+  const [selectedEventId, setSelectedEventId] = useState<string>('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newEventName, setNewEventName] = useState('');
+  const [submittingEvent, setSubmittingEvent] = useState(false);
+
+  useEffect(() => {
+    const loadEvents = async () => {
+      try {
+        const list = await getEvents();
+        setEvents(list);
+        const selId = await getFilterEventId();
+        if (selId) {
+          setSelectedEventId(selId);
+        }
+      } catch (e) {
+        console.error('Failed to load events in Sidebar:', e);
+      }
+    };
+    loadEvents();
+  }, []);
+
+  const handleEventChange = (eventId: string) => {
+    if (!eventId) return;
+    localStorage.setItem('selected_event_id', eventId);
+    window.location.reload();
+  };
+
+  const handleCreateEventSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const nameClean = newEventName.trim();
+    if (!nameClean) {
+      alert('イベント名を入力してください。');
+      return;
+    }
+    
+    try {
+      setSubmittingEvent(true);
+      const created = await createEvent(nameClean);
+      localStorage.setItem('selected_event_id', created.id);
+      setIsModalOpen(false);
+      setNewEventName('');
+      window.location.reload();
+    } catch (err: any) {
+      alert('イベントの追加に失敗しました: ' + err.message);
+    } finally {
+      setSubmittingEvent(false);
+    }
+  };
 
   const menuItems = [
     { name: 'ダッシュボード', path: '/', icon: LayoutDashboard },
@@ -54,7 +107,36 @@ export default function Sidebar() {
       <aside className={`${styles.sidebar} ${isOpen ? styles.sidebarOpen : ''}`}>
         <div className={styles.header}>
           <TrendingUp className={styles.logoIcon} />
-          <span className={styles.logoText}>学祭カレーレジ</span>
+          <span className={styles.logoText}>学祭レジ&利益管理</span>
+        </div>
+
+        {/* Event Switcher Selector */}
+        <div className={styles.eventSwitcherSection}>
+          <div className={styles.eventSwitcherLabel}>
+            <CalendarRange size={14} className={styles.eventIcon} />
+            <span>対象イベント</span>
+          </div>
+          <div className={styles.eventSelectorWrapper}>
+            <select
+              className={styles.eventSelect}
+              value={selectedEventId}
+              onChange={(e) => handleEventChange(e.target.value)}
+            >
+              {events.map(ev => (
+                <option key={ev.id} value={ev.id}>
+                  {ev.name} {ev.is_active ? '(現在稼働中)' : ''}
+                </option>
+              ))}
+            </select>
+            <button 
+              type="button" 
+              className={styles.addEventBtn} 
+              onClick={() => { setIsOpen(false); setIsModalOpen(true); }}
+              title="新しいイベントを開始"
+            >
+              <Plus size={16} />
+            </button>
+          </div>
         </div>
 
         <nav className={styles.nav}>
@@ -99,6 +181,57 @@ export default function Sidebar() {
           <div className={styles.copyright}>© 2026 School Festival POS</div>
         </div>
       </aside>
+
+      {/* New Event Modal */}
+      {isModalOpen && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <div className={styles.modalHeader}>
+              <h3>新しい学祭・イベントを開始</h3>
+              <button className={styles.modalCloseBtn} onClick={() => setIsModalOpen(false)}>
+                <X size={18} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleCreateEventSubmit}>
+              <div className="form-group" style={{ marginBottom: '1.25rem' }}>
+                <label className="form-label" style={{ fontWeight: 600 }}>イベント名 (学祭名)</label>
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  placeholder="例: 学園祭2027、エコフェス秋の陣" 
+                  value={newEventName}
+                  onChange={(e) => setNewEventName(e.target.value)}
+                  disabled={submittingEvent}
+                  autoFocus
+                />
+                <p className="text-muted" style={{ fontSize: '0.725rem', marginTop: '0.35rem' }}>
+                  ※新しいイベントを作成すると、自動的にそのイベントが稼働開始状態になります。
+                  これ以降に記録される売上・経費はすべて新しいイベントに登録され、古いデータと混ざることはありません。
+                </p>
+              </div>
+              
+              <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+                <button 
+                  type="button" 
+                  className="btn btn-secondary" 
+                  onClick={() => setIsModalOpen(false)}
+                  disabled={submittingEvent}
+                >
+                  キャンセル
+                </button>
+                <button 
+                  type="submit" 
+                  className="btn btn-primary" 
+                  disabled={submittingEvent}
+                >
+                  <span>{submittingEvent ? '作成中...' : '新イベントを開始'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </>
   );
 }

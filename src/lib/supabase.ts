@@ -15,6 +15,7 @@ export interface Order {
   change_given: number;
   created_at?: string;
   items?: OrderItem[]; // UIで表示しやすいように結合した情報
+  event_id?: string;
 }
 
 export interface OrderItem {
@@ -37,6 +38,7 @@ export interface SourcingItem {
   purchase_date: string;
   notes?: string;
   created_at?: string;
+  event_id?: string;
 }
 
 export interface CashDrawerLog {
@@ -45,6 +47,7 @@ export interface CashDrawerLog {
   amount: number;
   description?: string;
   created_at?: string;
+  event_id?: string;
 }
 
 export interface CashCount {
@@ -62,6 +65,14 @@ export interface CashCount {
   expected_total: number;
   discrepancy: number;
   created_at?: string;
+  event_id?: string;
+}
+
+export interface Event {
+  id: string;
+  name: string;
+  is_active: boolean;
+  created_at: string;
 }
 
 export interface SalesDashboardData {
@@ -102,6 +113,7 @@ const MOCK_ORDERS_KEY = 'sales_app_pos_orders';
 const MOCK_ORDER_ITEMS_KEY = 'sales_app_pos_order_items';
 const MOCK_CASH_LOGS_KEY = 'sales_app_pos_cash_logs';
 const MOCK_CASH_COUNTS_KEY = 'sales_app_pos_cash_counts';
+const MOCK_EVENTS_KEY = 'sales_app_pos_events';
 
 // 旧データの自動クリーンアップ用マイグレーション
 if (typeof window !== 'undefined') {
@@ -128,14 +140,18 @@ const initialProducts: Product[] = [
   { id: 'p3', name: '炭酸水', price: 100 },
 ];
 
+const initialEvents: Event[] = [
+  { id: 'e_ecofest2026', name: 'エコフェス2026', is_active: true, created_at: new Date('2026-06-25T09:00:00Z').toISOString() }
+];
+
 const initialSourcing: SourcingItem[] = [
-  { id: 's1', item_name: '牛肉 (カレー用)', quantity: 5, unit: 'kg', cost: 8500, purchase_date: '2026-06-25', notes: '学祭前日仕入れ' },
-  { id: 's2', item_name: '玉ねぎ・人参・ジャガイモ', quantity: 1, unit: 'セット', cost: 2500, purchase_date: '2026-06-25', notes: '近所のスーパー' },
-  { id: 's3', item_name: '米 (コシヒカリ)', quantity: 15, unit: 'kg', cost: 5400, purchase_date: '2026-06-25', notes: 'コメ兵' },
-  { id: 's4', item_name: 'カレールー', quantity: 6, unit: '箱', cost: 1800, purchase_date: '2026-06-25', notes: '中辛' },
-  { id: 's5', item_name: 'ミネラルウォーター (500ml)', quantity: 72, unit: '本', cost: 3600, purchase_date: '2026-06-26', notes: '問屋仕入れ' },
-  { id: 's6', item_name: '使い捨てカレー皿', quantity: 150, unit: '枚', cost: 2200, purchase_date: '2026-06-26', notes: '資材消耗品' },
-  { id: 's7', item_name: 'プラスチックスプーン', quantity: 150, unit: '本', cost: 800, purchase_date: '2026-06-26', notes: '資材消耗品' },
+  { id: 's1', item_name: '牛肉 (カレー用)', quantity: 5, unit: 'kg', cost: 8500, purchase_date: '2026-06-25', notes: '学祭前日仕入れ', event_id: 'e_ecofest2026' },
+  { id: 's2', item_name: '玉ねぎ・人参・ジャガイモ', quantity: 1, unit: 'セット', cost: 2500, purchase_date: '2026-06-25', notes: '近所のスーパー', event_id: 'e_ecofest2026' },
+  { id: 's3', item_name: '米 (コシヒカリ)', quantity: 15, unit: 'kg', cost: 5400, purchase_date: '2026-06-25', notes: 'コメ兵', event_id: 'e_ecofest2026' },
+  { id: 's4', item_name: 'カレールー', quantity: 6, unit: '箱', cost: 1800, purchase_date: '2026-06-25', notes: '中辛', event_id: 'e_ecofest2026' },
+  { id: 's5', item_name: 'ミネラルウォーター (500ml)', quantity: 72, unit: '本', cost: 3600, purchase_date: '2026-06-26', notes: '問屋仕入れ', event_id: 'e_ecofest2026' },
+  { id: 's6', item_name: '使い捨てカレー皿', quantity: 150, unit: '枚', cost: 2200, purchase_date: '2026-06-26', notes: '資材消耗品', event_id: 'e_ecofest2026' },
+  { id: 's7', item_name: 'プラスチックスプーン', quantity: 150, unit: '本', cost: 800, purchase_date: '2026-06-26', notes: '資材消耗品', event_id: 'e_ecofest2026' },
 ];
 
 // 初期注文データ (最初は空から開始)
@@ -166,6 +182,70 @@ const setLocalStorage = <T>(key: string, data: T[]): void => {
 // ==========================================
 // DATABASE API INTERFACE
 // ==========================================
+
+const getSelectedEventIdSync = (): string | null => {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('selected_event_id');
+  }
+  return null;
+};
+
+export const getFilterEventId = async (): Promise<string | null> => {
+  const syncId = getSelectedEventIdSync();
+  if (syncId) return syncId;
+
+  const active = await getActiveEvent();
+  if (active) {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('selected_event_id', active.id);
+    }
+    return active.id;
+  }
+  return null;
+};
+
+export const getEvents = async (): Promise<Event[]> => {
+  if (supabase) {
+    const { data, error } = await supabase.from('events').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  } else {
+    return getLocalStorage<Event>(MOCK_EVENTS_KEY, initialEvents);
+  }
+};
+
+export const getActiveEvent = async (): Promise<Event | null> => {
+  if (supabase) {
+    const { data, error } = await supabase.from('events').select('*').eq('is_active', true).limit(1);
+    if (error) throw error;
+    return data && data.length > 0 ? data[0] : null;
+  } else {
+    const events = getLocalStorage<Event>(MOCK_EVENTS_KEY, initialEvents);
+    const active = events.find(e => e.is_active);
+    return active || null;
+  }
+};
+
+export const createEvent = async (name: string): Promise<Event> => {
+  if (supabase) {
+    await supabase.from('events').update({ is_active: false }).eq('is_active', true);
+    const { data, error } = await supabase.from('events').insert([{ name, is_active: true }]).select();
+    if (error) throw error;
+    return data[0];
+  } else {
+    const events = getLocalStorage<Event>(MOCK_EVENTS_KEY, initialEvents);
+    const updatedEvents = events.map(e => ({ ...e, is_active: false }));
+    const newEvent: Event = {
+      id: 'e_' + Math.random().toString(36).substr(2, 9),
+      name,
+      is_active: true,
+      created_at: new Date().toISOString()
+    };
+    updatedEvents.push(newEvent);
+    setLocalStorage(MOCK_EVENTS_KEY, updatedEvents);
+    return newEvent;
+  }
+};
 
 // 1. PRODUCTS (MENU) API
 export const getProducts = async (): Promise<Product[]> => {
@@ -230,26 +310,37 @@ export const deleteProduct = async (id: string): Promise<void> => {
 
 // 2. SOURCING (経費) API
 export const getSourcing = async (): Promise<SourcingItem[]> => {
+  const eventId = await getFilterEventId();
   if (supabase) {
-    const { data, error } = await supabase.from('sourcing').select('*').order('purchase_date', { ascending: false });
+    let query = supabase.from('sourcing').select('*').order('purchase_date', { ascending: false });
+    if (eventId) {
+      query = query.eq('event_id', eventId);
+    }
+    const { data, error } = await query;
     if (error) throw error;
     return data || [];
   } else {
-    return getLocalStorage<SourcingItem>(MOCK_SOURCING_KEY, initialSourcing);
+    const items = getLocalStorage<SourcingItem>(MOCK_SOURCING_KEY, initialSourcing);
+    return eventId ? items.filter(i => i.event_id === eventId) : items;
   }
 };
 
 export const addSourcingItem = async (item: Omit<SourcingItem, 'id'>): Promise<SourcingItem> => {
+  const eventId = await getFilterEventId();
   if (supabase) {
-    const { data, error } = await supabase.from('sourcing').insert([item]).select();
+    const { data, error } = await supabase
+      .from('sourcing')
+      .insert([{ ...item, event_id: eventId }])
+      .select();
     if (error) throw error;
     return data[0];
   } else {
-    const items = await getSourcing();
+    const items = getLocalStorage<SourcingItem>(MOCK_SOURCING_KEY, initialSourcing);
     const newItem: SourcingItem = {
       ...item,
       id: 's_' + Math.random().toString(36).substr(2, 9),
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      event_id: eventId || undefined
     };
     items.unshift(newItem);
     setLocalStorage(MOCK_SOURCING_KEY, items);
@@ -262,7 +353,7 @@ export const deleteSourcingItem = async (id: string): Promise<void> => {
     const { error } = await supabase.from('sourcing').delete().eq('id', id);
     if (error) throw error;
   } else {
-    const items = await getSourcing();
+    const items = getLocalStorage<SourcingItem>(MOCK_SOURCING_KEY, initialSourcing);
     const filtered = items.filter(i => i.id !== id);
     setLocalStorage(MOCK_SOURCING_KEY, filtered);
   }
@@ -270,26 +361,37 @@ export const deleteSourcingItem = async (id: string): Promise<void> => {
 
 // 3. CASH DRAWER LOGS (金銭・両替) API
 export const getCashLogs = async (): Promise<CashDrawerLog[]> => {
+  const eventId = await getFilterEventId();
   if (supabase) {
-    const { data, error } = await supabase.from('cash_drawer_logs').select('*').order('created_at', { ascending: false });
+    let query = supabase.from('cash_drawer_logs').select('*').order('created_at', { ascending: false });
+    if (eventId) {
+      query = query.eq('event_id', eventId);
+    }
+    const { data, error } = await query;
     if (error) throw error;
     return data || [];
   } else {
-    return getLocalStorage<CashDrawerLog>(MOCK_CASH_LOGS_KEY, initialCashLogs);
+    const logs = getLocalStorage<CashDrawerLog>(MOCK_CASH_LOGS_KEY, initialCashLogs);
+    return eventId ? logs.filter(l => l.event_id === eventId) : logs;
   }
 };
 
 export const addCashLog = async (log: Omit<CashDrawerLog, 'id'>): Promise<CashDrawerLog> => {
+  const eventId = await getFilterEventId();
   if (supabase) {
-    const { data, error } = await supabase.from('cash_drawer_logs').insert([log]).select();
+    const { data, error } = await supabase
+      .from('cash_drawer_logs')
+      .insert([{ ...log, event_id: eventId }])
+      .select();
     if (error) throw error;
     return data[0];
   } else {
-    const logs = await getCashLogs();
+    const logs = getLocalStorage<CashDrawerLog>(MOCK_CASH_LOGS_KEY, initialCashLogs);
     const newLog: CashDrawerLog = {
       ...log,
       id: 'cl_' + Math.random().toString(36).substr(2, 9),
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      event_id: eventId || undefined
     };
     logs.unshift(newLog);
     setLocalStorage(MOCK_CASH_LOGS_KEY, logs);
@@ -299,12 +401,18 @@ export const addCashLog = async (log: Omit<CashDrawerLog, 'id'>): Promise<CashDr
 
 // 4. CASH COUNTS (監査) API
 export const getCashCounts = async (): Promise<CashCount[]> => {
+  const eventId = await getFilterEventId();
   if (supabase) {
-    const { data, error } = await supabase.from('cash_counts').select('*').order('created_at', { ascending: false });
+    let query = supabase.from('cash_counts').select('*').order('created_at', { ascending: false });
+    if (eventId) {
+      query = query.eq('event_id', eventId);
+    }
+    const { data, error } = await query;
     if (error) throw error;
     return data || [];
   } else {
-    return getLocalStorage<CashCount>(MOCK_CASH_COUNTS_KEY, []);
+    const counts = getLocalStorage<CashCount>(MOCK_CASH_COUNTS_KEY, []);
+    return eventId ? counts.filter(c => c.event_id === eventId) : counts;
   }
 };
 
@@ -312,7 +420,7 @@ export const addCashCount = async (
   count: Omit<CashCount, 'id' | 'counted_total' | 'expected_total' | 'discrepancy'>,
   expectedTotal: number
 ): Promise<CashCount> => {
-  // 実測金額の計算
+  const eventId = await getFilterEventId();
   const countedTotal = 
     count.bill_10000 * 10000 +
     count.bill_5000 * 5000 +
@@ -333,20 +441,22 @@ export const addCashCount = async (
         ...count,
         counted_total: countedTotal,
         expected_total: expectedTotal,
-        discrepancy: discrepancy
+        discrepancy: discrepancy,
+        event_id: eventId
       }])
       .select();
     if (error) throw error;
     return data[0];
   } else {
-    const counts = await getCashCounts();
+    const counts = getLocalStorage<CashCount>(MOCK_CASH_COUNTS_KEY, []);
     const newCount: CashCount = {
       ...count,
       id: 'cc_' + Math.random().toString(36).substr(2, 9),
       counted_total: countedTotal,
       expected_total: expectedTotal,
       discrepancy: discrepancy,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      event_id: eventId || undefined
     };
     counts.unshift(newCount);
     setLocalStorage(MOCK_CASH_COUNTS_KEY, counts);
@@ -356,25 +466,8 @@ export const addCashCount = async (
 
 // 5. EXPECTED CASH IN REGISTER (理論レジ金残高の算出)
 export const getExpectedCash = async (): Promise<number> => {
-  let logs: any[] = [];
-  let orders: any[] = [];
-
-  if (supabase) {
-    const [logsRes, ordersRes] = await Promise.all([
-      supabase.from('cash_drawer_logs').select('amount'),
-      supabase.from('orders').select('total_amount')
-    ]);
-    logs = logsRes.data || [];
-    orders = ordersRes.data || [];
-  } else {
-    logs = getLocalStorage<CashDrawerLog>(MOCK_CASH_LOGS_KEY, initialCashLogs);
-    orders = getLocalStorage<Order>(MOCK_ORDERS_KEY, initialOrders);
-  }
-
-  const logsSum = logs.reduce((sum, l) => sum + Number(l.amount), 0);
-  const salesSum = orders.reduce((sum, o) => sum + Number(o.total_amount), 0);
-
-  return logsSum + salesSum;
+  const dashboard = await getSalesDashboard();
+  return dashboard.expectedCash;
 };
 
 // 6. ORDERS & ITEMS (売上) API
@@ -382,13 +475,15 @@ export const createOrder = async (
   orderData: Omit<Order, 'id'>, 
   itemsData: Array<{ product_id: string; product_name: string; quantity: number; price: number }>
 ): Promise<Order> => {
+  const eventId = await getFilterEventId();
   if (supabase) {
     const { data: orderResult, error: orderError } = await supabase
       .from('orders')
       .insert([{
         total_amount: orderData.total_amount,
         payment_received: orderData.payment_received,
-        change_given: orderData.change_given
+        change_given: orderData.change_given,
+        event_id: eventId
       }])
       .select();
 
@@ -419,7 +514,8 @@ export const createOrder = async (
     const newOrder: Order = {
       ...orderData,
       id: newOrderId,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      event_id: eventId || undefined
     };
 
     const newItems: OrderItem[] = itemsData.map(item => ({
@@ -463,12 +559,17 @@ export const deleteOrder = async (orderId: string): Promise<void> => {
 };
 
 export const getOrders = async (): Promise<Order[]> => {
+  const eventId = await getFilterEventId();
   let orders: Order[] = [];
   let orderItems: OrderItem[] = [];
 
   if (supabase) {
+    let query = supabase.from('orders').select('*').order('created_at', { ascending: false });
+    if (eventId) {
+      query = query.eq('event_id', eventId);
+    }
     const [ordersRes, orderItemsRes] = await Promise.all([
-      supabase.from('orders').select('*').order('created_at', { ascending: false }),
+      query,
       supabase.from('order_items').select('*')
     ]);
 
@@ -480,6 +581,10 @@ export const getOrders = async (): Promise<Order[]> => {
   } else {
     orders = getLocalStorage<Order>(MOCK_ORDERS_KEY, initialOrders);
     orderItems = getLocalStorage<OrderItem>(MOCK_ORDER_ITEMS_KEY, initialOrderItems);
+
+    if (eventId) {
+      orders = orders.filter(o => o.event_id === eventId);
+    }
   }
 
   return orders.map(order => {
@@ -493,6 +598,7 @@ export const getOrders = async (): Promise<Order[]> => {
 
 // 7. INTEGRATED DASHBOARD AGGREGATES
 export const getSalesDashboard = async (): Promise<SalesDashboardData> => {
+  const eventId = await getFilterEventId();
   let orders: Order[] = [];
   let orderItems: OrderItem[] = [];
   let sourcing: SourcingItem[] = [];
@@ -500,12 +606,24 @@ export const getSalesDashboard = async (): Promise<SalesDashboardData> => {
   let cashCounts: CashCount[] = [];
 
   if (supabase) {
+    let ordersQuery = supabase.from('orders').select('*').order('created_at', { ascending: false });
+    let sourcingQuery = supabase.from('sourcing').select('*');
+    let cashLogsQuery = supabase.from('cash_drawer_logs').select('*');
+    let cashCountsQuery = supabase.from('cash_counts').select('*').order('created_at', { ascending: false });
+
+    if (eventId) {
+      ordersQuery = ordersQuery.eq('event_id', eventId);
+      sourcingQuery = sourcingQuery.eq('event_id', eventId);
+      cashLogsQuery = cashLogsQuery.eq('event_id', eventId);
+      cashCountsQuery = cashCountsQuery.eq('event_id', eventId);
+    }
+
     const [ordersRes, orderItemsRes, sourcingRes, cashLogsRes, cashCountsRes] = await Promise.all([
-      supabase.from('orders').select('*').order('created_at', { ascending: false }),
+      ordersQuery,
       supabase.from('order_items').select('*'),
-      supabase.from('sourcing').select('*'),
-      supabase.from('cash_drawer_logs').select('*'),
-      supabase.from('cash_counts').select('*').order('created_at', { ascending: false }).limit(1)
+      sourcingQuery,
+      cashLogsQuery,
+      cashCountsQuery.limit(1)
     ]);
 
     if (ordersRes.error) throw ordersRes.error;
@@ -525,6 +643,13 @@ export const getSalesDashboard = async (): Promise<SalesDashboardData> => {
     sourcing = getLocalStorage<SourcingItem>(MOCK_SOURCING_KEY, initialSourcing);
     cashLogs = getLocalStorage<CashDrawerLog>(MOCK_CASH_LOGS_KEY, initialCashLogs);
     cashCounts = getLocalStorage<CashCount>(MOCK_CASH_COUNTS_KEY, []);
+
+    if (eventId) {
+      orders = orders.filter(o => o.event_id === eventId);
+      sourcing = sourcing.filter(s => s.event_id === eventId);
+      cashLogs = cashLogs.filter(l => l.event_id === eventId);
+      cashCounts = cashCounts.filter(c => c.event_id === eventId);
+    }
   }
 
   // 1. 売上集計
@@ -537,9 +662,12 @@ export const getSalesDashboard = async (): Promise<SalesDashboardData> => {
   const netProfit = totalSales - totalCost;
   const margin = totalSales > 0 ? Math.round((netProfit / totalSales) * 100) : 0;
 
-  // 4. 商品ごとの販売数集計
+  // 4. 商品ごとの販売数集計 (選択中イベントの注文明細のみカウント)
   const itemsSold: { [productName: string]: number } = {};
-  orderItems.forEach(item => {
+  const activeOrderIds = new Set(orders.map(o => o.id));
+  const activeOrderItems = orderItems.filter(item => activeOrderIds.has(item.order_id));
+  
+  activeOrderItems.forEach(item => {
     itemsSold[item.product_name] = (itemsSold[item.product_name] || 0) + item.quantity;
   });
 

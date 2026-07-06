@@ -194,3 +194,136 @@
 .logoutIcon {
   flex-shrink: 0;
 }
+
+/* Event Switcher styles [NEW] */
+.eventSwitcherSection {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.eventSwitcherLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.725rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted-foreground);
+}
+
+.eventIcon {
+  color: var(--primary);
+}
+
+.eventSelectorWrapper {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.eventSelect {
+  flex-grow: 1;
+  height: 36px;
+  background: var(--secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--foreground);
+  outline: none;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.eventSelect:focus {
+  border-color: var(--primary);
+}
+
+.addEventBtn {
+  width: 36px;
+  height: 36px;
+  background: var(--primary-light);
+  border: 1px solid var(--primary-border);
+  color: var(--primary);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.addEventBtn:hover {
+  background: var(--primary);
+  color: white;
+}
+
+/* Event Modal Popup */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  width: 90%;
+  max-width: 450px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-lg);
+  animation: modalSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalSlideUp {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.75rem;
+}
+
+.modalHeader h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--foreground);
+  margin: 0;
+}
+
+.modalCloseBtn {
+  background: transparent;
+  border: none;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+
+.modalCloseBtn:hover {
+  background: var(--secondary);
+  color: var(--foreground);
+}

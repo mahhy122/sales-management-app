@@ -119,3 +119,26 @@ CREATE POLICY "Allow public write for cash_drawer_logs" ON public.cash_drawer_lo
 
 CREATE POLICY "Allow public read for cash_counts" ON public.cash_counts FOR SELECT USING (true);
 CREATE POLICY "Allow public write for cash_counts" ON public.cash_counts FOR ALL USING (true) WITH CHECK (true);
+
+-- =========================================================================
+-- [追加] マルチイベント (学祭イベント切り替え) 管理用定義
+-- =========================================================================
+
+-- 1. イベント管理テーブル
+CREATE TABLE IF NOT EXISTS public.events (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL UNIQUE,
+    is_active BOOLEAN DEFAULT false NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- RLSポリシーの有効化とパブリック読み書き許可
+ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read for events" ON public.events FOR SELECT USING (true);
+CREATE POLICY "Allow public write for events" ON public.events FOR ALL USING (true) WITH CHECK (true);
+
+-- 2. 既存テーブルへ event_id 外部キー列を追加
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS event_id UUID REFERENCES public.events(id) ON DELETE SET NULL;
+ALTER TABLE public.sourcing ADD COLUMN IF NOT EXISTS event_id UUID REFERENCES public.events(id) ON DELETE SET NULL;
+ALTER TABLE public.cash_drawer_logs ADD COLUMN IF NOT EXISTS event_id UUID REFERENCES public.events(id) ON DELETE SET NULL;
+ALTER TABLE public.cash_counts ADD COLUMN IF NOT EXISTS event_id UUID REFERENCES public.events(id) ON DELETE SET NULL;
