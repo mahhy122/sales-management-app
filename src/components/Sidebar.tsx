@@ -30,10 +30,12 @@ export default function Sidebar() {
   const [newEventName, setNewEventName] = useState('');
   const [submittingEvent, setSubmittingEvent] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadEvents = async () => {
       try {
+        setLoading(true);
         setLoadError(null);
         const list = await getEvents();
         setEvents(list);
@@ -46,6 +48,8 @@ export default function Sidebar() {
       } catch (e: any) {
         console.error('Failed to load events in Sidebar:', e);
         setLoadError(e.message || '読込エラー');
+      } finally {
+        setLoading(false);
       }
     };
     loadEvents();
@@ -129,8 +133,10 @@ export default function Sidebar() {
             >
               {loadError ? (
                 <option value="">エラー: {loadError}</option>
-              ) : events.length === 0 ? (
+              ) : loading ? (
                 <option value="">読込中...</option>
+              ) : events.length === 0 ? (
+                <option value="">イベントデータがありません</option>
               ) : (
                 events.map(ev => (
                   <option key={ev.id} value={ev.id}>
