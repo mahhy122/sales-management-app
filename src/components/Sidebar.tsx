@@ -29,18 +29,23 @@ export default function Sidebar() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newEventName, setNewEventName] = useState('');
   const [submittingEvent, setSubmittingEvent] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadEvents = async () => {
       try {
+        setLoadError(null);
         const list = await getEvents();
         setEvents(list);
         const selId = await getFilterEventId();
         if (selId) {
           setSelectedEventId(selId);
+        } else if (list.length > 0) {
+          setSelectedEventId(list[0].id);
         }
-      } catch (e) {
+      } catch (e: any) {
         console.error('Failed to load events in Sidebar:', e);
+        setLoadError(e.message || '読込エラー');
       }
     };
     loadEvents();
@@ -119,14 +124,20 @@ export default function Sidebar() {
           <div className={styles.eventSelectorWrapper}>
             <select
               className={styles.eventSelect}
-              value={selectedEventId}
+              value={selectedEventId || (events.length > 0 ? events[0].id : '')}
               onChange={(e) => handleEventChange(e.target.value)}
             >
-              {events.map(ev => (
-                <option key={ev.id} value={ev.id}>
-                  {ev.name} {ev.is_active ? '(現在稼働中)' : ''}
-                </option>
-              ))}
+              {loadError ? (
+                <option value="">エラー: {loadError}</option>
+              ) : events.length === 0 ? (
+                <option value="">読込中...</option>
+              ) : (
+                events.map(ev => (
+                  <option key={ev.id} value={ev.id}>
+                    {ev.name} {ev.is_active ? '(現在稼働中)' : ''}
+                  </option>
+                ))
+              )}
             </select>
             <button 
               type="button" 
