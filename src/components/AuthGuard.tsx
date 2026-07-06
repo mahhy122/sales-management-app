@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { Lock, Eye, EyeOff, AlertCircle, CalendarRange } from 'lucide-react';
+import { getEvents, getFilterEventId, Event } from '@/lib/supabase';
 import styles from './AuthGuard.module.css';
 
 interface AuthGuardProps {
@@ -13,6 +14,10 @@ export default function AuthGuard({ children }: AuthGuardProps) {
   const [passwordInput, setPasswordInput] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const [events, setEvents] = useState<Event[]>([]);
+  const [selectedEventId, setSelectedEventId] = useState<string>('');
+  const [loadingEvents, setLoadingEvents] = useState(true);
 
   // Get the configured password from environment variables or fallback to default
   const EXPECTED_PASSWORD = process.env.NEXT_PUBLIC_APP_PASSWORD || 'curry2026';
@@ -30,6 +35,33 @@ export default function AuthGuard({ children }: AuthGuardProps) {
       }
     }
   }, [EXPECTED_PASSWORD]);
+
+  useEffect(() => {
+    const loadEvents = async () => {
+      try {
+        setLoadingEvents(true);
+        const list = await getEvents();
+        setEvents(list);
+        const selId = await getFilterEventId();
+        if (selId) {
+          setSelectedEventId(selId);
+        } else if (list.length > 0) {
+          setSelectedEventId(list[0].id);
+        }
+      } catch (e) {
+        console.error('Failed to load events in AuthGuard:', e);
+      } finally {
+        setLoadingEvents(false);
+      }
+    };
+    loadEvents();
+  }, []);
+
+  const handleEventChange = (eventId: string) => {
+    if (!eventId) return;
+    localStorage.setItem('selected_event_id', eventId);
+    setSelectedEventId(eventId);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,7 +94,33 @@ export default function AuthGuard({ children }: AuthGuardProps) {
             <Lock size={26} className={styles.lockIcon} />
           </div>
           
-          <h2 className={styles.cardTitle}>学祭カレーPOSシステム</h2>
+          <h2 className={styles.cardTitle}>学祭レジ&利益管理</h2>
+
+          {/* Target Event Selector on Login Screen */}
+          <div className={styles.loginEventSection}>
+            <div className={styles.loginEventLabel}>
+              <CalendarRange size={14} className={styles.loginEventIcon} />
+              <span>接続先イベント</span>
+            </div>
+            <select
+              className={styles.loginEventSelect}
+              value={selectedEventId || (events.length > 0 ? events[0].id : '')}
+              onChange={(e) => handleEventChange(e.target.value)}
+            >
+              {loadingEvents ? (
+                <option value="">読込中...</option>
+              ) : events.length === 0 ? (
+                <option value="">イベントデータがありません</option>
+              ) : (
+                events.map(ev => (
+                  <option key={ev.id} value={ev.id}>
+                    {ev.name} {ev.is_active ? '(現在稼働中)' : ''}
+                  </option>
+                ))
+              )}
+            </select>
+          </div>
+          
           <p className={styles.cardSubtitle}>
             このアプリケーションは保護されています。<br />
             閲覧・操作するにはアクセスコードを入力してください。
