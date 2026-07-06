@@ -208,6 +208,16 @@ export const getEvents = async (): Promise<Event[]> => {
   if (supabase) {
     const { data, error } = await supabase.from('events').select('*').order('created_at', { ascending: false });
     if (error) throw error;
+    
+    // Self-healing: If no events exist in Supabase, automatically create the default event
+    if (!data || data.length === 0) {
+      try {
+        const defaultEvent = await createEvent('エコフェス2026');
+        return [defaultEvent];
+      } catch (err) {
+        console.error('Failed to auto-seed default event in Supabase:', err);
+      }
+    }
     return data || [];
   } else {
     return getLocalStorage<Event>(MOCK_EVENTS_KEY, initialEvents);
@@ -218,7 +228,12 @@ export const getActiveEvent = async (): Promise<Event | null> => {
   if (supabase) {
     const { data, error } = await supabase.from('events').select('*').eq('is_active', true).limit(1);
     if (error) throw error;
-    return data && data.length > 0 ? data[0] : null;
+    
+    if (!data || data.length === 0) {
+      const allEvents = await getEvents();
+      return allEvents.length > 0 ? allEvents.find(e => e.is_active) || allEvents[0] : null;
+    }
+    return data[0];
   } else {
     const events = getLocalStorage<Event>(MOCK_EVENTS_KEY, initialEvents);
     const active = events.find(e => e.is_active);
