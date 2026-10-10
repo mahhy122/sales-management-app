@@ -39,6 +39,7 @@ export interface SourcingItem {
   notes?: string;
   created_at?: string;
   event_id?: string;
+  category?: string; // '食材・資材' | '光熱費' | '衛生管理費' | '設備・備品' | 'その他経費'
 }
 
 export interface CashDrawerLog {
@@ -145,13 +146,15 @@ const initialEvents: Event[] = [
 ];
 
 const initialSourcing: SourcingItem[] = [
-  { id: 's1', item_name: '牛肉 (カレー用)', quantity: 5, unit: 'kg', cost: 8500, purchase_date: '2026-06-25', notes: '学祭前日仕入れ', event_id: 'e_ecofest2026' },
-  { id: 's2', item_name: '玉ねぎ・人参・ジャガイモ', quantity: 1, unit: 'セット', cost: 2500, purchase_date: '2026-06-25', notes: '近所のスーパー', event_id: 'e_ecofest2026' },
-  { id: 's3', item_name: '米 (コシヒカリ)', quantity: 15, unit: 'kg', cost: 5400, purchase_date: '2026-06-25', notes: 'コメ兵', event_id: 'e_ecofest2026' },
-  { id: 's4', item_name: 'カレールー', quantity: 6, unit: '箱', cost: 1800, purchase_date: '2026-06-25', notes: '中辛', event_id: 'e_ecofest2026' },
-  { id: 's5', item_name: 'ミネラルウォーター (500ml)', quantity: 72, unit: '本', cost: 3600, purchase_date: '2026-06-26', notes: '問屋仕入れ', event_id: 'e_ecofest2026' },
-  { id: 's6', item_name: '使い捨てカレー皿', quantity: 150, unit: '枚', cost: 2200, purchase_date: '2026-06-26', notes: '資材消耗品', event_id: 'e_ecofest2026' },
-  { id: 's7', item_name: 'プラスチックスプーン', quantity: 150, unit: '本', cost: 800, purchase_date: '2026-06-26', notes: '資材消耗品', event_id: 'e_ecofest2026' },
+  { id: 's1', item_name: '牛肉 (カレー用)', quantity: 5, unit: 'kg', cost: 8500, purchase_date: '2026-06-25', notes: '学祭前日仕入れ', event_id: 'e_ecofest2026', category: '食材・資材' },
+  { id: 's2', item_name: '玉ねぎ・人参・ジャガイモ', quantity: 1, unit: 'セット', cost: 2500, purchase_date: '2026-06-25', notes: '近所のスーパー', event_id: 'e_ecofest2026', category: '食材・資材' },
+  { id: 's3', item_name: '米 (コシヒカリ)', quantity: 15, unit: 'kg', cost: 5400, purchase_date: '2026-06-25', notes: 'コメ兵', event_id: 'e_ecofest2026', category: '食材・資材' },
+  { id: 's4', item_name: 'カレールー', quantity: 6, unit: '箱', cost: 1800, purchase_date: '2026-06-25', notes: '中辛', event_id: 'e_ecofest2026', category: '食材・資材' },
+  { id: 's5', item_name: 'ミネラルウォーター (500ml)', quantity: 72, unit: '本', cost: 3600, purchase_date: '2026-06-26', notes: '問屋仕入れ', event_id: 'e_ecofest2026', category: '食材・資材' },
+  { id: 's6', item_name: '使い捨てカレー皿', quantity: 150, unit: '枚', cost: 2200, purchase_date: '2026-06-26', notes: '資材消耗品', event_id: 'e_ecofest2026', category: '食材・資材' },
+  { id: 's7', item_name: 'プラスチックスプーン', quantity: 150, unit: '本', cost: 800, purchase_date: '2026-06-26', notes: '資材消耗品', event_id: 'e_ecofest2026', category: '食材・資材' },
+  { id: 's8', item_name: 'プロパンガス使用料', quantity: 1, unit: '式', cost: 4500, purchase_date: '2026-06-25', notes: 'ガス会社精算', event_id: 'e_ecofest2026', category: '光熱費' },
+  { id: 's9', item_name: 'アルコール消毒液・検便費用', quantity: 1, unit: 'セット', cost: 2000, purchase_date: '2026-06-24', notes: '保健所衛生対策', event_id: 'e_ecofest2026', category: '衛生管理費' },
 ];
 
 // 初期注文データ (最初は空から開始)

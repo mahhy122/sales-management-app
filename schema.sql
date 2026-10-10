@@ -142,3 +142,6 @@ ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS event_id UUID REFERENCES publ
 ALTER TABLE public.sourcing ADD COLUMN IF NOT EXISTS event_id UUID REFERENCES public.events(id) ON DELETE SET NULL;
 ALTER TABLE public.cash_drawer_logs ADD COLUMN IF NOT EXISTS event_id UUID REFERENCES public.events(id) ON DELETE SET NULL;
 ALTER TABLE public.cash_counts ADD COLUMN IF NOT EXISTS event_id UUID REFERENCES public.events(id) ON DELETE SET NULL;
+
+-- 3. 経費管理テーブルへ category (経費区分) 列を追加
+ALTER TABLE public.sourcing ADD COLUMN IF NOT EXISTS category TEXT DEFAULT '食材・資材';
