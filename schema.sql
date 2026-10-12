@@ -145,3 +145,6 @@ ALTER TABLE public.cash_counts ADD COLUMN IF NOT EXISTS event_id UUID REFERENCES
 
 -- 3. 経費管理テーブルへ category (経費区分) 列を追加
 ALTER TABLE public.sourcing ADD COLUMN IF NOT EXISTS category TEXT DEFAULT '食材・資材';
+
+-- 4. 経費管理テーブルへ payer (支払者・立替者) 列を追加
+ALTER TABLE public.sourcing ADD COLUMN IF NOT EXISTS payer TEXT DEFAULT 'サークル部費';

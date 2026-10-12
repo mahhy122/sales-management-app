@@ -334,3 +334,42 @@
   color: var(--foreground);
   margin-top: 0.15rem;
 }
+
+/* Payer Styles */
+.payerBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--secondary);
+  border: 1px solid var(--border);
+  padding: 0.2rem 0.55rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: var(--foreground);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.payerChipBtn {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.payerChipBtn:hover {
+  background: var(--secondary);
+  color: var(--foreground);
+  border-color: var(--primary-border);
+}
+
+.payerChipActive {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+}

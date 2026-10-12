@@ -13,7 +13,8 @@ import {
   ShieldCheck,
   Package,
   Layers,
-  Filter
+  Filter,
+  User
 } from 'lucide-react';
 import { getSourcing, addSourcingItem, deleteSourcingItem, SourcingItem } from '@/lib/supabase';
 import SupabaseSetupBanner from '@/components/SupabaseSetupBanner';
@@ -35,6 +36,7 @@ export default function SourcingPage() {
 
   // Form states
   const [category, setCategory] = useState('食材・資材');
+  const [payer, setPayer] = useState('サークル部費');
   const [itemName, setItemName] = useState('');
   const [quantity, setQuantity] = useState('');
   const [unit, setUnit] = useState('kg');
@@ -117,7 +119,8 @@ export default function SourcingPage() {
         cost: cleanCost,
         purchase_date: purchaseDate,
         notes: notes.trim() || undefined,
-        category: category
+        category: category,
+        payer: payer.trim() || 'サークル部費'
       });
 
       setFormSuccess(true);
@@ -125,6 +128,7 @@ export default function SourcingPage() {
       setQuantity('');
       setCost('');
       setNotes('');
+      setPayer('サークル部費');
       
       // Reload sourcing items list
       await loadSourcingData();
@@ -298,6 +302,7 @@ export default function SourcingPage() {
                       <tr>
                         <th style={{ width: '105px' }}>発生日</th>
                         <th style={{ width: '115px' }}>区分</th>
+                        <th style={{ width: '120px' }}>支払者</th>
                         <th>項目・内容</th>
                         <th className="text-right">数量</th>
                         <th className="text-right" style={{ width: '120px' }}>金額</th>
@@ -310,6 +315,12 @@ export default function SourcingPage() {
                         <tr key={item.id}>
                           <td className="text-muted font-semibold">{item.purchase_date}</td>
                           <td>{getCategoryBadge(item.category)}</td>
+                          <td>
+                            <span className={styles.payerBadge}>
+                              <User size={12} className="text-muted" />
+                              <span>{item.payer || 'サークル部費'}</span>
+                            </span>
+                          </td>
                           <td>
                             <div className={styles.itemName}>{item.item_name}</div>
                           </td>
@@ -437,6 +448,32 @@ export default function SourcingPage() {
                   className="form-input"
                   value={purchaseDate}
                   onChange={(e) => setPurchaseDate(e.target.value)}
+                />
+              </div>
+
+              <div className="form-group">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                  <label className="form-label" style={{ fontWeight: 600, margin: 0 }}>支払者・立替者</label>
+                  <span className="text-muted" style={{ fontSize: '0.725rem' }}>ワンタップ選択可</span>
+                </div>
+                <div style={{ display: 'flex', gap: '0.35rem', marginBottom: '0.45rem', flexWrap: 'wrap' }}>
+                  {['サークル部費', '立替', '本部会計'].map(p => (
+                    <button
+                      key={p}
+                      type="button"
+                      className={`${styles.payerChipBtn} ${payer === p ? styles.payerChipActive : ''}`}
+                      onClick={() => setPayer(p)}
+                    >
+                      {p}
+                    </button>
+                  ))}
+                </div>
+                <input 
+                  type="text" 
+                  className="form-input"
+                  placeholder="例: サークル部費、山田、田中（立替）"
+                  value={payer}
+                  onChange={(e) => setPayer(e.target.value)}
                 />
               </div>
 

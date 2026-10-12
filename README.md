@@ -86,9 +86,11 @@ Supabase (PostgreSQL) 上に以下のテーブルが構築されています。�
 * `item_name` (TEXT)
 * `quantity` (NUMERIC)
 * `unit` (TEXT)
-* `cost` (INTEGER): 仕入れ金額
-* `purchase_date` (DATE)
-* `notes` (TEXT)
+* `cost` (INTEGER): 仕入れ・支出金額
+* `purchase_date` (DATE): 発生日
+* `notes` (TEXT): 備考・支払先
+* `category` (TEXT): 経費区分（食材・資材、光熱費、衛生管理費、設備・備品、その他経費）
+* `payer` (TEXT): 支払者・立替者（サークル部費、立替、メンバー名等）
 * `event_id` (UUID, 外部キー)
 
 ### 6. `cash_drawer_logs` (レジ内現金入出金履歴)
